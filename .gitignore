@@ -1,0 +1,5 @@
+*.nc
+*.grib
+.ipynb_checkpoints/
+CC_Practica1/
+__pycache__/
