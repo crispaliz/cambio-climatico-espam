@@ -1,22 +1,26 @@
-"""ERA5 (ECMWF / Copernicus): credenciales, descarga optimizada desde el Climate Data Store y lectura.
+"""ERA5 (ECMWF / Copernicus): credencial personal, descarga por celda y paso de horario a diario y mensual.
 
 © 2026 Cristian Omar Paliz Acosta · ESPAM MFL · Todos los derechos reservados.
 
 Requisitos del usuario:
-  1. Cuenta en https://cds.climate.copernicus.eu
-  2. Licencia aceptada en cada conjunto (al final de la pestaña Download).
+  1. Cuenta propia en https://cds.climate.copernicus.eu
+  2. Licencia aceptada en los conjuntos que use (al final de la pestaña Download de cada uno).
   3. API Token PERSONAL (perfil del sitio): una cuenta por persona, porque el CDS limita por cuenta.
      En Colab, en Secrets con el nombre CDSAPI_KEY, o pasado a `credenciales(token)` desde el cuaderno.
 
-Optimización y cuidado del servidor:
-  - Una sola solicitud mensual con todas las variables, recortada al recuadro de la zona.
-  - Diario: las variables que comparten estadístico van juntas (4 solicitudes por año, no 8).
-  - Solicitudes en serie (el CDS ya las pone en cola), reintentos con espera creciente y
-    archivos que ya existen no se vuelven a pedir.
+Método (igual para estudiantes y para la preparación del docente):
+  1. `celdas`: celdas de 0,25° que tocan la zona, con la fracción de su área dentro.
+  2. Una solicitud por celda al conjunto de series horarias por punto
+     (reanalysis-era5-single-levels-timeseries), que guarda los datos por lugar y responde en segundos.
+  3. `horario_a_diario`: día en hora local (UTC-5), con la hora de inicio que se elija (0 o 7).
+     Tmax y Tmin son el máximo y el mínimo de los 24 valores horarios; HR y q se calculan hora a hora;
+     la velocidad del viento es el promedio de las velocidades horarias.
+  4. Se arma la malla diaria de la zona y, de ella, la mensual. Los archivos horarios se borran.
 
-Variables diarias (release era5-v1, una por año, todo Ecuador, día local UTC-5):
-    tmed, tmax, tmin (°C), pr (mm/día), hr (%), q (g/kg), ps (hPa), u10, v10 (m/s)
-    hr y q se calculan del punto de rocío (y la presión, para q): ERA5 no ofrece q a 2 m en el CDS.
+Archivos que produce en la carpeta de datos:
+    era5_diario_<zona>.nc    tmed, tmax, tmin, pr, hr, q, ps, u10, v10, ws
+    era5_mensual_<zona>.nc   las mismas, medias mensuales (pr en mm/mes)
+    era5_terreno_<zona>.nc   altura del terreno del modelo (m)
 """
 from __future__ import annotations
 
@@ -25,42 +29,26 @@ import pathlib
 import time
 import zipfile
 
+import numpy as np
+
 from herramientas import variables as V
 
 URL_CDS = "https://cds.climate.copernicus.eu/api"
+SERIES = "reanalysis-era5-single-levels-timeseries"
 MENSUAL = "reanalysis-era5-single-levels-monthly-means"
-DIARIO = "derived-era5-single-levels-daily-statistics"
 DOI = {MENSUAL: "10.24381/cds.f17050d7"}
-RECUADRO_ECUADOR = [2.25, -92.75, -5.75, -74.5]  # N, O, S, E: todas las provincias, incluida Galápagos, con margen
-
-# nombre en el CDS -> nombre corto en el NetCDF
-CDS = {"2m_temperature": "t2m", "2m_dewpoint_temperature": "d2m", "total_precipitation": "tp",
-       "surface_pressure": "sp", "mean_sea_level_pressure": "msl",
-       "10m_u_component_of_wind": "u10", "10m_v_component_of_wind": "v10", "geopotential": "z"}
-MENSUALES = ["2m_temperature", "2m_dewpoint_temperature", "total_precipitation", "surface_pressure",
-             "mean_sea_level_pressure", "10m_u_component_of_wind", "10m_v_component_of_wind"]
-# estadístico diario -> variables del CDS que se piden juntas
-GRUPOS_DIARIOS = {
-    "daily_mean": ["2m_temperature", "2m_dewpoint_temperature", "surface_pressure",
-                   "10m_u_component_of_wind", "10m_v_component_of_wind"],
-    "daily_maximum": ["2m_temperature"],
-    "daily_minimum": ["2m_temperature"],
-    "daily_sum": ["total_precipitation"],
-}
+VARIABLES_SERIES = ["2m_temperature", "2m_dewpoint_temperature", "total_precipitation",
+                    "surface_pressure", "10m_u_component_of_wind", "10m_v_component_of_wind"]
+CORTOS = {"2m_temperature": "t2m", "2m_dewpoint_temperature": "d2m", "total_precipitation": "tp",
+          "surface_pressure": "sp", "10m_u_component_of_wind": "u10", "10m_v_component_of_wind": "v10"}
+UTC_LOCAL = -5  # Ecuador continental
 
 
-# ------------------------------------------------------------------ credenciales y cliente
+# ------------------------------------------------------------------ credencial y solicitudes
 def credenciales(token: str | None = None, nombre_secreto: str = "CDSAPI_KEY") -> str:
     """Configura la credencial PERSONAL del Climate Data Store para esta sesión.
 
-    Cada persona usa su propia cuenta y su propio API Token: así cada una tiene su propia cola
-    y su propio límite en el CDS, y nadie queda bloqueado por las descargas de otros.
-
-    Orden de búsqueda del token:
-      1. el argumento `token` (lo que el usuario escribió en el cuaderno);
-      2. Colab › Secrets, con el nombre `CDSAPI_KEY` (lo más seguro);
-      3. la variable de entorno `CDSAPI_KEY`;
-      4. si nada de lo anterior existe, se pide por teclado (no queda escrito).
+    Orden: argumento `token` › Colab Secrets (`CDSAPI_KEY`) › variable de entorno › teclado.
     Escribe ~/.cdsapirc en la máquina de la sesión (no en Drive ni en el repositorio) y devuelve
     el token enmascarado, para que el usuario confirme que es el suyo.
     """
@@ -84,51 +72,46 @@ def credenciales(token: str | None = None, nombre_secreto: str = "CDSAPI_KEY") -
     return f"{token[:4]}…{token[-4:]}"
 
 
-def _hay_credencial() -> bool:
-    return (pathlib.Path.home() / ".cdsapirc").exists()
-
-
 def _pedir(conjunto: str, solicitud: dict, destino: pathlib.Path, intentos: int = 4) -> pathlib.Path:
-    """Envía una solicitud al CDS con reintentos y espera creciente; no repite si el archivo existe."""
+    """Solicitud al CDS con reintentos y espera creciente; no repite si el archivo ya existe."""
+    destino = pathlib.Path(destino)
     if destino.exists() and destino.stat().st_size > 0:
         return destino
     import cdsapi
 
-    if not _hay_credencial():
+    if not (pathlib.Path.home() / ".cdsapirc").exists():
         credenciales()
     destino.parent.mkdir(parents=True, exist_ok=True)
     tmp = destino.with_suffix(".parcial")
     for k in range(intentos):
         try:
-            cdsapi.Client(quiet=True).retrieve(conjunto, solicitud, str(tmp))
+            cdsapi.Client(quiet=True, progress=False).retrieve(conjunto, solicitud, str(tmp))
             tmp.rename(destino)
             return destino
         except Exception as err:
-            if k == intentos - 1 or "licence" in str(err).lower() or "license" in str(err).lower():
+            texto = str(err).lower()
+            if k == intentos - 1 or "licence" in texto or "license" in texto or "401" in texto:
                 raise
-            espera = 60 * 2 ** k
-            print(f"Reintento en {espera} s: {err}")
+            espera = 30 * 2 ** k
+            print(f"  reintento en {espera} s: {err}")
             time.sleep(espera)
 
 
-def _netcdfs(ruta: pathlib.Path) -> list[pathlib.Path]:
-    """El CDS entrega un NetCDF o un .zip con varios (uno por tipo de paso). Devuelve los NetCDF."""
-    if not zipfile.is_zipfile(ruta):
-        return [ruta]
-    carpeta = ruta.with_suffix("")
-    with zipfile.ZipFile(ruta) as z:
-        z.extractall(carpeta)
-    return sorted(carpeta.glob("*.nc"))
-
-
 def abrir_ds(ruta):
-    """Abre la descarga (NetCDF o zip) como un solo Dataset con nombres time, lat, lon."""
+    """Abre una descarga del CDS (NetCDF o zip con varios) con nombres time, lat, lon."""
     import xarray as xr
 
+    ruta = pathlib.Path(ruta)
+    archivos = [ruta]
+    if zipfile.is_zipfile(ruta):
+        carpeta = ruta.with_suffix("")
+        with zipfile.ZipFile(ruta) as z:
+            z.extractall(carpeta)
+        archivos = sorted(carpeta.glob("*.nc"))
     partes = []
-    for f in _netcdfs(pathlib.Path(ruta)):
+    for f in archivos:
         ds = xr.open_dataset(f)
-        ren = {k: v for k, v in {"valid_time": "time", "latitude": "lat", "longitude": "lon"}.items()
+        ren = {k: v for k, v in {"valid_time": "time", "date": "time", "latitude": "lat", "longitude": "lon"}.items()
                if k in ds.dims or k in ds.coords}
         ds = ds.rename(ren)
         for extra in ("number", "expver"):
@@ -137,118 +120,114 @@ def abrir_ds(ruta):
             if extra in ds.coords:
                 ds = ds.drop_vars(extra)
         partes.append(ds)
-    return xr.merge(partes, compat="override").sortby("lat")
+    ds = xr.merge(partes, compat="override")
+    return ds.sortby("lat") if "lat" in ds.dims else ds
 
 
-# ------------------------------------------------------------------ mensual (estudiantes)
-def solicitud_mensual(variables, anios, area, meses=range(1, 13)) -> dict:
-    return {
-        "product_type": ["monthly_averaged_reanalysis"],
-        "variable": list(variables),
-        "year": [str(a) for a in anios],
-        "month": [f"{m:02d}" for m in meses],
-        "time": ["00:00"],
-        "area": list(area),
-        "data_format": "netcdf",
-        "download_format": "unarchived",
-    }
+# ------------------------------------------------------------------ serie horaria de una celda
+def descargar_celda(lat: float, lon: float, anios, carpeta) -> pathlib.Path:
+    """Serie horaria completa de una celda (todas las variables) en una sola solicitud rápida."""
+    a0, a1 = min(anios), max(anios)
+    destino = pathlib.Path(carpeta) / f"h_{lat:+.2f}_{lon:+.2f}_{a0}_{a1}.nc"
+    solicitud = {"variable": VARIABLES_SERIES, "location": {"latitude": float(lat), "longitude": float(lon)},
+                 "date": [f"{a0}-01-01/{a1 + 1}-01-01"], "data_format": "netcdf"}
+    return _pedir(SERIES, solicitud, destino)
 
 
-def descargar_mensual(anios, area, destino, variables=MENSUALES, meses=range(1, 13)) -> pathlib.Path:
-    """Una sola solicitud con todas las variables mensuales para el recuadro de la zona."""
-    return _pedir(MENSUAL, solicitud_mensual(variables, anios, area, meses), pathlib.Path(destino))
+def horario_a_diario(ds, inicio_dia: int = 0, utc_local: int = UTC_LOCAL):
+    """Convierte la serie horaria de una celda en valores diarios del día local.
 
-
-def mensual_estandar(ruta):
-    """Convierte la descarga mensual a las variables y unidades de trabajo del curso."""
+    `inicio_dia`: hora local en que empieza el día (0 = 00–24 h; 7 = 07–07 h, como la lluvia del INAMHI).
+    La precipitación horaria de ERA5 es la acumulada en la hora que TERMINA en la marca de tiempo:
+    se asigna a la hora anterior antes de sumar. Solo se conservan días con las 24 horas.
+    """
+    import pandas as pd
     import xarray as xr
 
-    ds = abrir_ds(ruta)
-    out = xr.Dataset()
-    if "t2m" in ds:
-        out["tmed"] = ds["t2m"] - 273.15
-    if "tp" in ds:
-        out["pr"] = ds["tp"] * 1000 * ds["time"].dt.days_in_month
-    if "d2m" in ds and "t2m" in ds:
-        out["hr"] = V.hr_desde_rocio(ds["t2m"] - 273.15, ds["d2m"] - 273.15)
-    if "d2m" in ds and "sp" in ds:
-        out["q"] = V.especifica_desde_rocio(ds["d2m"] - 273.15, ds["sp"] / 100)
-    if "sp" in ds:
-        out["ps"] = ds["sp"] / 100
-    if "msl" in ds:
-        out["pnm"] = ds["msl"] / 100
-        out["pnm"].attrs = {"units": "hPa", "long_name": "Presión a nivel del mar"}
-    for c in ("u10", "v10"):
-        if c in ds:
-            out[c] = ds[c]
-    out = V.anotar(out)
-    if "pr" in out:
-        out["pr"].attrs["units"] = "mm/mes"
-    return out
+    s = {CORTOS.get(k, k): ds[k].values for k in ds.data_vars}
+    t = pd.DatetimeIndex(ds["time"].values)
+    df = pd.DataFrame({k: v.ravel() for k, v in s.items()}, index=t)
+    t_c, td_c, p = df["t2m"] - 273.15, df["d2m"] - 273.15, df["sp"] / 100
+    h = pd.DataFrame({
+        "t": t_c, "hr": V.hr_desde_rocio(t_c, td_c), "q": V.especifica_desde_rocio(td_c, p), "ps": p,
+        "u10": df["u10"], "v10": df["v10"], "ws": np.hypot(df["u10"], df["v10"]),
+    }, index=t)
+    corrimiento = pd.Timedelta(hours=utc_local - inicio_dia)
+    dia = (t + corrimiento).floor("D")
+    dia_pr = (t - pd.Timedelta(hours=1) + corrimiento).floor("D")
+    g = h.groupby(dia)
+    n = g["t"].count()
+    out = pd.DataFrame({"tmed": g["t"].mean(), "tmax": g["t"].max(), "tmin": g["t"].min(),
+                        "hr": g["hr"].mean(), "q": g["q"].mean(), "ps": g["ps"].mean(),
+                        "u10": g["u10"].mean(), "v10": g["v10"].mean(), "ws": g["ws"].mean()})
+    pr = (df["tp"] * 1000).groupby(dia_pr)
+    out["pr"] = pr.sum().reindex(out.index)
+    out.loc[(n < 24) | (pr.count().reindex(out.index) < 24), :] = np.nan
+    out = out.dropna(how="all")
+    out.index.name = "time"
+    return xr.Dataset.from_dataframe(out[["tmed", "tmax", "tmin", "pr", "hr", "q", "ps", "u10", "v10", "ws"]])
 
 
-def terreno(ruta):
-    """Altura del terreno del modelo (m) a partir de la geopotencial."""
-    ds = abrir_ds(ruta)
-    z = ds["z"].isel(time=0) if "time" in ds["z"].dims else ds["z"]
-    return z / 9.80665
+# ------------------------------------------------------------------ zona completa
+def descargar_zona(geom, anios, carpeta_datos, slug: str, inicio_dia: int = 0, borrar_horarios: bool = True,
+                   avance: bool = True, carpeta_celdas=None) -> dict:
+    """Descarga y procesa todas las celdas de la zona. Reanudable celda por celda.
+
+    `carpeta_celdas`: dónde se guardan las series diarias de cada celda (por defecto, `_celdas_era5` dentro de
+    `carpeta_datos`). El docente usa una sola para todas las provincias: las celdas de borde compartidas se
+    descargan una sola vez.
+    Devuelve {"diario": ruta, "mensual": ruta, "celdas": DataFrame}.
+    """
+    import pandas as pd
+    import xarray as xr
+
+    from herramientas import limites
+
+    carpeta_datos = pathlib.Path(carpeta_datos)
+    carpeta_datos.mkdir(parents=True, exist_ok=True)
+    tmp = pathlib.Path(carpeta_celdas) if carpeta_celdas else carpeta_datos / "_celdas_era5"
+    tmp.mkdir(parents=True, exist_ok=True)
+    cs = limites.celdas(geom, 0.25)
+    sufijo = f"{min(anios)}_{max(anios)}_d{inicio_dia:02d}"
+    t0 = time.time()
+    for i, r in cs.iterrows():
+        diario = tmp / f"d_{r.lat:+.2f}_{r.lon:+.2f}_{sufijo}.nc"
+        if not diario.exists():
+            h = descargar_celda(r.lat, r.lon, anios, tmp)
+            d = horario_a_diario(abrir_ds(h), inicio_dia).expand_dims(lat=[r.lat], lon=[r.lon])
+            d = d.sel(time=slice(f"{min(anios)}-01-01", f"{max(anios)}-12-31"))
+            d.to_netcdf(diario)
+            if borrar_horarios:
+                h.unlink(missing_ok=True)
+        if avance:
+            print(f"  {slug}: celda {i + 1}/{len(cs)} ({r.lat:+.2f}, {r.lon:+.2f}) lista · {(time.time() - t0) / 60:.1f} min")
+    partes = [xr.open_dataset(tmp / f"d_{r.lat:+.2f}_{r.lon:+.2f}_{sufijo}.nc") for r in cs.itertuples()]
+    malla = xr.combine_by_coords(partes, combine_attrs="drop_conflicts", join="outer").transpose("time", "lat", "lon")
+    lat = np.round(np.arange(malla.lat.min(), malla.lat.max() + 1e-9, 0.25), 4)
+    lon = np.round(np.arange(malla.lon.min(), malla.lon.max() + 1e-9, 0.25), 4)
+    malla = V.anotar(malla.reindex(lat=lat, lon=lon, method="nearest", tolerance=1e-6))
+    malla.attrs = {"title": f"ERA5 diario por celda, {slug}", "source": f"C3S Climate Data Store, {SERIES}",
+                   "day": f"día local UTC{UTC_LOCAL:+d}, desde las {inicio_dia:02d}:00",
+                   "processing": "herramientas/reanalisis/era5.py: horario -> diario por celda"}
+    enc = {v: {"zlib": True, "complevel": 4, "dtype": "float32"} for v in malla.data_vars}
+    f_d = carpeta_datos / f"era5_diario_{slug}.nc"
+    f_m = carpeta_datos / f"era5_mensual_{slug}.nc"
+    malla.load().to_netcdf(f_d, encoding=enc)
+    V.mensual_desde_diario(malla).to_netcdf(f_m, encoding=enc)
+    for p in partes:
+        p.close()
+    return {"diario": f_d, "mensual": f_m, "celdas": cs}
 
 
 def descargar_terreno(area, destino) -> pathlib.Path:
-    return _pedir(MENSUAL, solicitud_mensual(["geopotential"], [2000], area, [1]), pathlib.Path(destino))
+    """Geopotencial de un mes (fija): da la altura del terreno del modelo. Una solicitud pequeña."""
+    sol = {"product_type": ["monthly_averaged_reanalysis"], "variable": ["geopotential"], "year": ["2000"],
+           "month": ["01"], "time": ["00:00"], "area": list(area), "data_format": "netcdf", "download_format": "unarchived"}
+    return _pedir(MENSUAL, sol, pathlib.Path(destino))
 
 
-# ------------------------------------------------------------------ diario (docente)
-def solicitud_diaria(variables, estadistico: str, anio: int, area, zona_horaria: str = "utc-05:00") -> dict:
-    return {
-        "product_type": "reanalysis",
-        "variable": list(variables),
-        "year": str(anio),
-        "month": [f"{m:02d}" for m in range(1, 13)],
-        "day": [f"{d:02d}" for d in range(1, 32)],
-        "daily_statistic": estadistico,
-        "time_zone": zona_horaria,
-        "frequency": "1_hourly",
-        "area": list(area),
-    }
-
-
-def diario_estandar(por_estadistico: dict):
-    """Une las descargas de un año (una por estadístico) en las variables de trabajo."""
-    import xarray as xr
-
-    m, mx, mn, sm = (por_estadistico[k] for k in ("daily_mean", "daily_maximum", "daily_minimum", "daily_sum"))
-    out = xr.Dataset({
-        "tmed": m["t2m"] - 273.15,
-        "tmax": mx["t2m"] - 273.15,
-        "tmin": mn["t2m"] - 273.15,
-        "pr": sm["tp"] * 1000,
-        "hr": V.hr_desde_rocio(m["t2m"] - 273.15, m["d2m"] - 273.15),
-        "q": V.especifica_desde_rocio(m["d2m"] - 273.15, m["sp"] / 100),
-        "ps": m["sp"] / 100,
-        "u10": m["u10"],
-        "v10": m["v10"],
-    })
-    return V.anotar(out)
-
-
-def preparar_diario(anios, carpeta_trabajo, carpeta_salida, area=RECUADRO_ECUADOR) -> list[pathlib.Path]:
-    """(Docente) Un NetCDF por año para Ecuador con las 9 variables diarias. Reanudable."""
-    carpeta_trabajo, carpeta_salida = pathlib.Path(carpeta_trabajo), pathlib.Path(carpeta_salida)
-    carpeta_salida.mkdir(parents=True, exist_ok=True)
-    salidas = []
-    for a in anios:
-        f = carpeta_salida / f"era5_ecuador_diario_{a}.nc"
-        if not f.exists():
-            partes = {}
-            for est, vars_ in GRUPOS_DIARIOS.items():
-                ruta = _pedir(DIARIO, solicitud_diaria(vars_, est, a, area), carpeta_trabajo / f"era5_{est}_{a}.nc")
-                partes[est] = abrir_ds(ruta)
-            ds = diario_estandar(partes)
-            ds.attrs = {"title": f"ERA5 diario para Ecuador, {a}", "source": f"C3S Climate Data Store, {DIARIO}",
-                        "day": "día local (UTC-5)", "processing": "herramientas/reanalisis/era5.py",
-                        "note": "u10 y v10 son medias diarias de las componentes; la velocidad calculada con ellas es la del viento medio vectorial"}
-            ds.to_netcdf(f, encoding={v: {"zlib": True, "complevel": 4, "dtype": "float32"} for v in ds.data_vars})
-            print("guardado", f.name)
-        salidas.append(f)
-    return salidas
+def terreno(ruta):
+    """Altura del terreno del modelo (m)."""
+    ds = abrir_ds(ruta)
+    z = ds["z"].isel(time=0) if "time" in ds["z"].dims else ds["z"]
+    return z / 9.80665
