@@ -7,16 +7,20 @@ Docente: Cristian Omar Paliz Acosta, MSc. · ORCID 0000-0002-1738-8131
 ## Estructura
 
 ```
-practicas/            cuadernos por asignatura y práctica
-  ambiental/            Cambio Climático, Ingeniería Ambiental
-  riesgos-desastres/    Cambio Climático, Ingeniería en Riesgos de Desastres
-herramientas/         código reutilizable que importan los cuadernos
+practicas/            cuadernos de Colab
+  comun/                COMÚN a las dos carreras: obtención y preparación de datos
+    reanalisis/           CR01 descarga ERA5 y CORe · CR02 series de la zona
+    estaciones/           formato común de datos de estación
+  ambiental/            PROPIO de Ingeniería Ambiental (IA1_01, IA1_02, …)
+  riesgos-desastres/    PROPIO de Ingeniería en Riesgos de Desastres (RD1_01, RD1_02, …)
+herramientas/         código compartido que importan todos los cuadernos
   limites.py            provincias, cantones, celdas de la zona y pesos por área
   variables.py          humedad relativa y específica, viento y convenciones comunes
   reanalisis/           ERA5, CORe, release de datos por provincia
   publicar.py           (docente) publicación de releases en GitHub
   satelite/             estimaciones satelitales de precipitación
   estaciones/           lectura, control de calidad y métricas
+  indices/              ENSO (ONI, ICEN) e índices de extremos (ETCCDI)
   modelos/              salidas de modelos climáticos
   escenarios/           proyecciones y escenarios
 datos/                archivos pequeños y fijos (límites)
@@ -31,11 +35,34 @@ Los datos grandes (reanálisis, salidas de modelos) no se guardan en el reposito
 | ERA5 | Diario y mensual (series por punto, una solicitud por celda) | Diario y mensual |
 | CORe | Diario y mensual (o solo mensual, más rápido) | Diario y mensual |
 
+## Lo común y lo propio
+
+Las dos asignaturas comparten protocolo, territorio y fuentes, pero no el enfoque. Por eso **la obtención de datos es común** y **el análisis es propio de cada carrera**:
+
+```mermaid
+flowchart LR
+  H["herramientas/<br/>código compartido"] -.-> CR01
+  subgraph C["practicas/comun"]
+    CR01["CR01 · descarga ERA5 y CORe"] --> CR02["CR02 · series de la zona"]
+  end
+  CR02 --> IA["practicas/ambiental<br/>IA1_01 · IA1_02"]
+  CR02 --> RD["practicas/riesgos-desastres<br/>RD1_01 · RD1_02"]
+```
+
+| | Común | Ingeniería Ambiental | Riesgos de Desastres |
+|---|---|---|---|
+| Carpeta | `practicas/comun/` | `practicas/ambiental/` | `practicas/riesgos-desastres/` |
+| Cuadernos | `CR…` (y luego `CS`, `CM`, `CE`) | `IA<práctica>_<paso>` | `RD<práctica>_<paso>` |
+| Drive del estudiante | `CC_datos/<zona>/` | `CC_Ambiental/practica-N/<zona>/` | `CC_Riesgos/practica-N/<zona>/` |
+| Trabajo | — | Individual | Equipos de dos |
+
+Detalle en [`practicas/README.md`](practicas/README.md).
+
 ## Cómo trabajar
 
 1. Abra el cuaderno con el botón **Abrir en Colab**.
 2. **Archivo › Guardar una copia en Drive**. Trabaje siempre en su copia.
-3. Llene solo la celda **1** y ejecute las demás en orden. El cuaderno trae el código de `herramientas/` desde este repositorio.
+3. Ejecute primero los cuadernos comunes y luego los de su carrera. Llene solo el formulario de la celda **1**, con la misma zona en todos, y ejecute las demás celdas en orden. El cuaderno trae el código de `herramientas/` desde este repositorio.
 4. Los resultados se guardan en su Google Drive. Los estudiantes no suben archivos a este repositorio.
 
 ## Credenciales
@@ -50,9 +77,11 @@ Cada persona usa su propia cuenta: el CDS limita las solicitudes por cuenta y un
 
 ## Prácticas disponibles
 
-| Asignatura | Práctica | Cuadernos |
+| Capa | Práctica | Cuadernos |
 |---|---|---|
-| Ambiental | 1. Diagnóstico del clima observado (cualquier provincia o cantón; 9 variables) | [practica-1](practicas/ambiental/practica-1/): descarga → series → climatología → estación |
+| Común | Reanálisis (las dos carreras) | [comun/reanalisis](practicas/comun/reanalisis/): CR01 descarga → CR02 series |
+| Ambiental | 1. Diagnóstico del clima observado | [ambiental/practica-1](practicas/ambiental/practica-1/): IA1_01 climatología → IA1_02 estación–reanálisis |
+| Riesgos de Desastres | 1. Clima, ENSO y extremos del territorio | [riesgos-desastres/practica-1](practicas/riesgos-desastres/practica-1/): RD1_01 ciclo anual y ENSO → RD1_02 extremos y registro de eventos |
 
 ## Preparación de datos (docente)
 
