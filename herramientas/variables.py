@@ -74,3 +74,20 @@ def anotar(ds):
         if v in UNIDADES:
             ds[v].attrs.update({"units": UNIDADES[v], "long_name": NOMBRES[v]})
     return ds
+
+
+def mensual_desde_diario(ds, min_dias: int = 28):
+    """Valores mensuales a partir de diarios: medias (pr: total del mes en mm/mes).
+
+    Los meses con menos de `min_dias` días válidos quedan vacíos.
+    """
+    g = ds.resample(time="MS")
+    ref = "tmed" if "tmed" in ds else list(ds.data_vars)[0]
+    n = ds[ref].notnull().resample(time="MS").sum()
+    out = g.mean()
+    if "pr" in ds:
+        out["pr"] = g.sum(min_count=1)["pr"]
+    out = anotar(out.where(n >= min_dias))
+    if "pr" in out:
+        out["pr"].attrs["units"] = "mm/mes"
+    return out

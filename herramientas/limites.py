@@ -112,3 +112,96 @@ def zona(provincia_nombre: str, canton_nombre: str | None = None) -> dict:
                 "region": fila_p["region"], "geom": geom}
     return {"nombre": fila_p["nombre"], "slug": slug(fila_p["nombre"]), "tipo": "provincia",
             "codigo": fila_p["codigo"], "provincia": fila_p["nombre"], "region": fila_p["region"], "geom": geom_p}
+
+
+def fracciones(geom, lat, lon, resolucion: float = 0.25):
+    """Fracción (0–1) de cada celda de la malla (centros lat, lon) que cae dentro de la geometría.
+
+    Permite que cada celda pese en el promedio según la parte del territorio que cubre:
+    una celda mitad mar y mitad provincia pesa la mitad. Devuelve un DataArray (lat, lon).
+    """
+    import shapely
+    import xarray as xr
+
+    lat, lon = np.asarray(lat, dtype=float), np.asarray(lon, dtype=float)
+    LO, LA = np.meshgrid(lon, lat)
+    h = resolucion / 2
+    cajas = shapely.box(LO - h, LA - h, LO + h, LA + h)
+    shapely.prepare(geom)
+    frac = shapely.area(shapely.intersection(geom, cajas)) / (resolucion ** 2)
+    return xr.DataArray(np.clip(frac, 0, 1), coords={"lat": lat, "lon": lon}, dims=("lat", "lon"), name="fraccion")
+
+
+def celdas(geom, resolucion: float = 0.25, minimo: float = 1e-3):
+    """Celdas de la malla (centros múltiplos de `resolucion`) que tocan la geometría, con su fracción."""
+    import pandas as pd
+
+    n, o, s, e = recuadro(geom, resolucion, margen_celdas=0)
+    lat = np.round(np.arange(s, n + 1e-9, resolucion), 4)
+    lon = np.round(np.arange(o, e + 1e-9, resolucion), 4)
+    fr = fracciones(geom, lat, lon, resolucion).to_series().rename("fraccion").reset_index()
+    return fr[fr["fraccion"] > minimo].reset_index(drop=True)
+
+
+def promedio_ponderado(da, frac):
+    """Promedio espacial ponderado por la fracción de área dentro de la zona y por el coseno de la latitud.
+
+    `frac` puede estar en otra malla: se toma la fracción de la celda más cercana a cada punto de `da`.
+    """
+    f = frac.reindex(lat=da["lat"], lon=da["lon"], method="nearest", tolerance=1e-6).fillna(0)
+    return da.weighted(f * np.cos(np.deg2rad(da["lat"]))).mean(["lat", "lon"])
+
+
+# ------------------------------------------------------------------ ayuda para elegir la zona
+def tabla_zonas(provincia_nombre: str | None = None):
+    """Provincias (si `provincia_nombre` es None) o cantones de una provincia, con lo necesario para elegir.
+
+    Columnas: código DPA, nombre tal como se elige en la celda 1, región o provincia, superficie (km²)
+    y número de celdas de ERA5 (0,25°) que tocan la zona.
+    """
+    import pandas as pd
+
+    if provincia_nombre is None:
+        gdf = cargar("provincias")
+        gdf = gdf[gdf["region"] != "Zona no delimitada"]
+        nombres, extra = gdf["nombre"], ("región", gdf["region"])
+    else:
+        fila_p, _ = provincia(provincia_nombre)
+        gdf = cargar("cantones")
+        gdf = gdf[gdf["provincia"] == fila_p["nombre"]]
+        nombres, extra = gdf["nombre_dpa"].str.title(), ("provincia", gdf["provincia"])
+    km2 = gdf.to_crs(32717).area / 1e6
+    out = pd.DataFrame({"código DPA": gdf["codigo"].values, "nombre": nombres.values, extra[0]: extra[1].values,
+                        "superficie_km2": km2.round(0).astype(int).values,
+                        "celdas_ERA5": [len(celdas(g, 0.25)) for g in gdf.geometry]})
+    out = out.iloc[out["nombre"].map(normalizar).argsort().values]
+    return out.reset_index(drop=True).rename_axis("n.º").rename(lambda i: i + 1)
+
+
+def mapa_zonas(zona_sel: dict, ax=None):
+    """Mapa de la provincia con sus cantones numerados (o del país, si la zona es una provincia)."""
+    import matplotlib.pyplot as plt
+
+    if ax is None:
+        _, ax = plt.subplots(figsize=(7, 7))
+    if zona_sel["tipo"] == "provincia":
+        gdf = cargar("provincias")
+        insular = zona_sel["nombre"] == "Galápagos"  # Galápagos se muestra sola; el continente, sin ella
+        gdf = gdf[(gdf["region"] != "Zona no delimitada") & ((gdf["nombre"] == "Galápagos") == insular)]
+        etiqueta = gdf["nombre"]
+        titulo = f"Provincias del Ecuador {'insular' if insular else 'continental'} · elegida: {zona_sel['nombre']}"
+    else:
+        gdf = cargar("cantones")
+        gdf = gdf[gdf["provincia"] == zona_sel["provincia"]]
+        etiqueta = gdf["nombre_dpa"].str.title()
+        titulo = f"Cantones de {zona_sel['provincia']} · elegido: {zona_sel['nombre']}"
+    gdf.plot(ax=ax, color="#EDEDED", edgecolor="0.45", linewidth=0.5)
+    import geopandas as gpd
+
+    gpd.GeoSeries([zona_sel["geom"]]).plot(ax=ax, color="#F2A65A", edgecolor="k", linewidth=1)
+    for nombre, g in zip(etiqueta, gdf.geometry):
+        p = g.representative_point()
+        ax.annotate(nombre.replace(" de los ", "\nde los "), (p.x, p.y), ha="center", va="center", fontsize=6.5)
+    ax.set_title(titulo, fontsize=10)
+    ax.set_xlabel("Longitud"); ax.set_ylabel("Latitud")
+    return ax
