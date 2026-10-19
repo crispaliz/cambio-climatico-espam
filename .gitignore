@@ -1,5 +1,13 @@
+# Datos que nunca van al repositorio (se descargan o se publican como release)
 *.nc
 *.grib
-.ipynb_checkpoints/
+*.grb
+*.idx
+CC_datos/
+CC_Ambiental/
+CC_Riesgos/
+CC_releases/
 CC_Practica1/
+# Entorno
+.ipynb_checkpoints/
 __pycache__/
