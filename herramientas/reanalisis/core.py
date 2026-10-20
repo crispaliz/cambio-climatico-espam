@@ -72,8 +72,8 @@ def url_6h(momento: dt.datetime) -> str:
 
 
 def url_mes(anio: int, mes: int) -> str:
-    """Archivo de promedios mensuales de flujos (patrón según la documentación de CPC: verificar)."""
-    return f"{BASE_MES}/grb2d{anio}{mes:02d}01"
+    """Archivo de promedios mensuales de flujos: grb2dAAAAMM (verificado en el servidor de CPC, oct. 2026)."""
+    return f"{BASE_MES}/grb2d{anio}{mes:02d}"
 
 
 # ------------------------------------------------------------------ inventario y descarga parcial
@@ -115,7 +115,7 @@ def _get(url: str, rango=None, intentos: int = 5, pausa: float = 0.2) -> tuple[b
             time.sleep(pausa * random.uniform(0.5, 1.5))
             req = urllib.request.Request(url, headers={"User-Agent": "cambio-climatico-espam (docencia ESPAM MFL)"})
             if rango:
-                req.add_header("Range", f"bytes={rango[0]}-{rango[1]}")
+                req.add_header("Range", f"bytes={rango[0]}-{'' if rango[1] is None else rango[1]}")
             with urllib.request.urlopen(req, timeout=120) as r:
                 return r.read(), r.status
         except urllib.error.HTTPError as err:
@@ -143,6 +143,22 @@ def descargar_campos(momento: dt.datetime, carpeta) -> pathlib.Path:
     return extraer(url_6h(momento), f, CAMPOS, "6h")
 
 
+def _mensaje(trozo: bytes, codigo: int) -> bytes | None:
+    """Devuelve el mensaje GRIB1 completo si es del parámetro esperado; si no, None.
+
+    Comprueba la marca 'GRIB', la edición 1, que el largo total (octetos 5–7 de la sección 0) quepa en el
+    trozo y el código de parámetro (octeto 9 de la sección 1). Los archivos de CPC traen 8 bytes de relleno
+    entre mensajes (marcas de registro), que aquí se descartan. Así un inventario reutilizado de otro
+    archivo nunca entrega un campo equivocado.
+    """
+    if len(trozo) < 28 or trozo[:4] != b"GRIB" or trozo[7] != 1 or trozo[16] != codigo:
+        return None
+    largo = int.from_bytes(trozo[4:7], "big")
+    if largo > len(trozo) or trozo[largo - 4:largo] != b"7777":
+        return None
+    return trozo[:largo]
+
+
 def extraer(url: str, f: pathlib.Path, campos, clave: str) -> pathlib.Path:
     """Guarda en `f` solo los mensajes GRIB de `campos`, pidiendo al servidor únicamente esos bytes."""
     f = pathlib.Path(f)
@@ -155,13 +171,14 @@ def extraer(url: str, f: pathlib.Path, campos, clave: str) -> pathlib.Path:
         for ini, fin in rangos(sel):
             datos, estado = _get(url, (ini, fin))
             if estado == 200:  # el servidor ignoró el rango: se recorta del archivo completo
-                datos = datos[ini:fin + 1]
-            for r in (r for r in sel if ini <= r["ini"] <= fin):
-                trozo = datos[r["ini"] - ini: r["fin"] - ini + 1]
-                if trozo[:4] != b"GRIB":
+                datos = datos[ini:] if fin is None else datos[ini:fin + 1]
+            for r in (r for r in sel if ini <= r["ini"] and (fin is None or r["ini"] <= fin)):
+                trozo = datos[r["ini"] - ini:] if r["fin"] is None else datos[r["ini"] - ini: r["fin"] - ini + 1]
+                msj = _mensaje(trozo, campos[(r["var"], r["nivel"])][1])
+                if msj is None:
                     ok = False
                     break
-                piezas.append(trozo)
+                piezas.append(msj)
             if not ok:
                 break
         if ok:
