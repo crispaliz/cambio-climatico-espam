@@ -151,18 +151,56 @@ def _dias_en_rachas(b: pd.Series, minimo: int) -> int:
 
 
 # ------------------------------------------------------------------ tendencia y retorno
+def mann_kendall(s: pd.Series) -> dict:
+    """Prueba de Mann-Kendall con corrección por autocorrelación de orden 1.
+
+    Las series climáticas anuales suelen tener persistencia (un año húmedo tiende a seguir a otro),
+    y eso hace que la prueba clásica declare significativas tendencias que no lo son. Se usa el
+    tamaño de muestra efectivo n_e = n (1 − r1) / (1 + r1), con r1 la autocorrelación de orden 1 de
+    la serie sin tendencia (Sen), inflando la varianza de S por n / n_e (Yue y Wang, 2004,
+    Water Resources Management 18: 201–218). Si r1 ≤ 0 no se corrige.
+    """
+    from scipy import stats
+
+    s = s.dropna()
+    n = len(s)
+    if n < 10:
+        return {"n": n, "S": np.nan, "r1": np.nan, "n_efectivo": np.nan, "p_valor": np.nan, "p_sin_corregir": np.nan}
+    x = np.asarray(s.index, dtype=float)
+    y = s.values.astype(float)
+    S = sum(np.sign(y[j] - y[i]) for i in range(n - 1) for j in range(i + 1, n))
+    _, cuentas = np.unique(y, return_counts=True)
+    var = (n * (n - 1) * (2 * n + 5) - sum(t * (t - 1) * (2 * t + 5) for t in cuentas)) / 18
+    pend, inter = stats.theilslopes(y, x)[:2]
+    resid = y - (inter + pend * x)
+    r1 = float(np.corrcoef(resid[:-1], resid[1:])[0, 1]) if np.std(resid) > 0 else 0.0
+    ne = n * (1 - r1) / (1 + r1) if r1 > 0 else n
+    def p_de(v):
+        z = 0.0 if S == 0 else (S - np.sign(S)) / np.sqrt(v)
+        return float(2 * (1 - stats.norm.cdf(abs(z))))
+    return {"n": n, "S": int(S), "r1": round(r1, 3), "n_efectivo": round(float(ne), 1),
+            "p_valor": round(p_de(var * n / ne), 4), "p_sin_corregir": round(p_de(var), 4)}
+
+
 def tendencia(s: pd.Series) -> dict:
-    """Pendiente de Sen (por década) y prueba de Mann-Kendall (tau de Kendall frente al tiempo)."""
+    """Pendiente de Sen (por década) y prueba de Mann-Kendall corregida por autocorrelación.
+
+    `p_valor` es el corregido (el que se reporta); `p_sin_corregir`, el de la prueba clásica, para
+    mostrar cuánto cambia la conclusión al considerar la persistencia de la serie.
+    """
     from scipy import stats
 
     s = s.dropna()
     if len(s) < 10:
-        return {"n": len(s), "sen_por_decada": np.nan, "tau": np.nan, "p_valor": np.nan, "significativa_5%": False}
+        return {"n": len(s), "sen_por_decada": np.nan, "tau": np.nan, "r1": np.nan, "p_valor": np.nan,
+                "p_sin_corregir": np.nan, "significativa_5%": False}
     x = np.asarray(s.index, dtype=float)
     pend = stats.theilslopes(s.values, x)[0]
-    tau, p = stats.kendalltau(x, s.values)
-    return {"n": len(s), "sen_por_decada": round(10 * pend, 3), "tau": round(tau, 3), "p_valor": round(p, 3),
-            "significativa_5%": bool(p < 0.05)}
+    tau = stats.kendalltau(x, s.values)[0]
+    mk = mann_kendall(s)
+    return {"n": len(s), "sen_por_decada": round(10 * pend, 3), "tau": round(tau, 3), "r1": mk["r1"],
+            "p_valor": round(mk["p_valor"], 3), "p_sin_corregir": round(mk["p_sin_corregir"], 3),
+            "significativa_5%": bool(mk["p_valor"] < 0.05)}
 
 
 def retorno(maximos: pd.Series, periodos=(2, 5, 10, 25, 50, 100), remuestreos: int = 300, semilla: int = 1) -> pd.DataFrame:

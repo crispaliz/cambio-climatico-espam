@@ -7,6 +7,7 @@ practicas/
   comun/                  lo que hacen IGUAL las dos carreras: obtener y preparar los datos
     reanalisis/             CR01 descarga ERA5 y CORe · CR02 series de la zona
     estaciones/             formato común de datos de estación
+    bitacora/               bitácora del evento El Niño 2026–2027 (anexo del capítulo 1)
     (satélite, modelos y escenarios: próximos cuadernos comunes)
   ambiental/              lo PROPIO de Ingeniería Ambiental (prácticas IA)
   riesgos-desastres/      lo PROPIO de Ingeniería en Riesgos de Desastres (prácticas RD)
@@ -17,7 +18,7 @@ flowchart LR
   subgraph C["Común · practicas/comun"]
     CR01["CR01 · descarga ERA5 y CORe"] --> CR02["CR02 · series de la zona"]
   end
-  CR02 --> IA["Ingeniería Ambiental<br/>IA1_01 climatología · IA1_02 estación–reanálisis"]
+  CR02 --> IA["Ingeniería Ambiental<br/>IA1_01 climatología · IA1_02 estación–reanálisis · IA1_03 tendencias y ENSO"]
   CR02 --> RD["Riesgos de Desastres<br/>RD1_01 ciclo anual y ENSO · RD1_02 extremos y eventos"]
 ```
 
@@ -41,5 +42,6 @@ Un estudiante descarga y prepara sus datos **una sola vez**, con los cuadernos c
 | Común | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/comun/reanalisis/CR02_series_zona.ipynb) `CR02_series_zona` | Series diaria y mensual de la zona, ponderadas por área |
 | Ambiental · P1 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/ambiental/practica-1/IA1_01_climatologia.ipynb) `IA1_01_climatologia` | Climatología 1995–2014 de las 9 variables |
 | Ambiental · P1 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/ambiental/practica-1/IA1_02_estacion_vs_reanalisis.ipynb) `IA1_02_estacion_vs_reanalisis` | Contraste estación–reanálisis |
+| Ambiental · P1 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/ambiental/practica-1/IA1_03_tendencias_enso.ipynb) `IA1_03_tendencias_enso` | Tendencias, prueba sin El Niño y compuestos por fase de ENSO |
 | Riesgos · P1 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/riesgos-desastres/practica-1/RD1_01_ciclo_anual_enso.ipynb) `RD1_01_ciclo_anual_enso` | Ciclo anual y compuestos por fase de ENSO |
-| Riesgos · P1 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/riesgos-desastres/practica-1/RD1_02_extremos_eventos.ipynb) `RD1_02_extremos_eventos` | Índices de extremos y registro de eventos |
+| Riesgos · P1 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/riesgos-desastres/practica-1/RD1_02_extremos_eventos.ipynb) `RD1_02_extremos_eventos` | Evidencia en las variables medias, índices de extremos y registro de eventos (con el ECU 911) |

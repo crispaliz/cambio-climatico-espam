@@ -11,6 +11,7 @@ practicas/            cuadernos de Colab
   comun/                COMÚN a las dos carreras: obtención y preparación de datos
     reanalisis/           CR01 descarga ERA5 y CORe · CR02 series de la zona
     estaciones/           formato común de datos de estación
+    bitacora/             bitácora del evento El Niño 2026–2027
   ambiental/            PROPIO de Ingeniería Ambiental (IA1_01, IA1_02, …)
   riesgos-desastres/    PROPIO de Ingeniería en Riesgos de Desastres (RD1_01, RD1_02, …)
 herramientas/         código compartido que importan todos los cuadernos
@@ -20,7 +21,8 @@ herramientas/         código compartido que importan todos los cuadernos
   publicar.py           (docente) publicación de releases en GitHub
   satelite/             estimaciones satelitales de precipitación
   estaciones/           lectura, control de calidad y métricas
-  indices/              ENSO (ONI, ICEN) e índices de extremos (ETCCDI)
+  indices/              ENSO (ONI, ICEN), índices de extremos (ETCCDI) y tendencias
+  eventos/              registros de emergencias (ECU 911) para contrastar con el clima
   modelos/              salidas de modelos climáticos
   escenarios/           proyecciones y escenarios
 datos/                archivos pequeños y fijos (límites)
@@ -45,7 +47,7 @@ flowchart LR
   subgraph C["practicas/comun"]
     CR01["CR01 · descarga ERA5 y CORe"] --> CR02["CR02 · series de la zona"]
   end
-  CR02 --> IA["practicas/ambiental<br/>IA1_01 · IA1_02"]
+  CR02 --> IA["practicas/ambiental<br/>IA1_01 · IA1_02 · IA1_03"]
   CR02 --> RD["practicas/riesgos-desastres<br/>RD1_01 · RD1_02"]
 ```
 
@@ -80,8 +82,9 @@ Cada persona usa su propia cuenta: el CDS limita las solicitudes por cuenta y un
 | Capa | Práctica | Cuadernos |
 |---|---|---|
 | Común | Reanálisis (las dos carreras) | [comun/reanalisis](practicas/comun/reanalisis/): CR01 descarga → CR02 series |
-| Ambiental | 1. Diagnóstico del clima observado | [ambiental/practica-1](practicas/ambiental/practica-1/): IA1_01 climatología → IA1_02 estación–reanálisis |
-| Riesgos de Desastres | 1. Clima, ENSO y extremos del territorio | [riesgos-desastres/practica-1](practicas/riesgos-desastres/practica-1/): RD1_01 ciclo anual y ENSO → RD1_02 extremos y registro de eventos |
+| Común | Bitácora de El Niño 2026–2027 | [comun/bitacora](practicas/comun/bitacora/): plantilla de registro semanal |
+| Ambiental | 1. Diagnóstico del clima observado | [ambiental/practica-1](practicas/ambiental/practica-1/): IA1_01 climatología → IA1_02 estación–reanálisis → IA1_03 tendencias y ENSO · [plantilla del capítulo 1](practicas/ambiental/practica-1/capitulo-1_plantilla.md) |
+| Riesgos de Desastres | 1. Clima, ENSO y extremos del territorio | [riesgos-desastres/practica-1](practicas/riesgos-desastres/practica-1/): RD1_01 ciclo anual y ENSO → RD1_02 extremos y registro de eventos · [plantilla del capítulo 1](practicas/riesgos-desastres/practica-1/capitulo-1_plantilla.md) |
 
 ## Preparación de datos (docente)
 

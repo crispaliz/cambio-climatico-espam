@@ -11,9 +11,11 @@ Los datos se obtienen con los cuadernos comunes a las dos carreras ([`practicas/
 | Paso | Cuaderno | Qué hace | Productos |
 |---|---|---|---|
 | 1 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/riesgos-desastres/practica-1/RD1_01_ciclo_anual_enso.ipynb) `RD1_01_ciclo_anual_enso` | Ciclo anual con rangos de variabilidad; ICEN y ONI; compuestos mensuales por fase; lluvia de la temporada según la intensidad del evento; mapa de la anomalía en años de El Niño | `RD1_01_*` |
-| 2 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/riesgos-desastres/practica-1/RD1_02_extremos_eventos.ipynb) `RD1_02_extremos_eventos` | Índices ETCCDI, tendencias (Sen y Mann-Kendall), extremos por fase de ENSO, periodos de retorno (GEV), lluvias candidatas y registro de eventos contrastado | `RD1_02_*` |
+| 2 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/riesgos-desastres/practica-1/RD1_02_extremos_eventos.ipynb) `RD1_02_extremos_eventos` | Tendencia de la temperatura media y la lluvia anual (con y sin años de El Niño); índices ETCCDI, tendencias (Sen y Mann-Kendall corregido por autocorrelación), extremos por fase de ENSO, periodos de retorno (GEV), lluvias candidatas y registro de eventos contrastado, con los incidentes del ECU 911 de la zona. Evaluación formativa | `RD1_02_*` |
 
 Los productos quedan en `Mi unidad/CC_Riesgos/practica-1/<zona>/`; las series se leen de `CC_datos/<zona>/`. Los dos integrantes del equipo ejecutan los cuadernos, cada uno en su Drive.
+
+Con los productos de los dos cuadernos se arma el capítulo 1 con la [plantilla](capitulo-1_plantilla.md): el borrador es la evaluación formativa y el capítulo corregido, la sumativa (estudio de casos). El evento El Niño en curso va en la [bitácora](../../comun/bitacora/), como anexo.
 
 ## Índices de ENSO
 
@@ -26,7 +28,16 @@ Ambos se calculan de ERSSTv5 (base 1991–2020) y se descargan de NOAA en cada e
 
 ## Registro de eventos (`registro_eventos.csv`)
 
-Plantilla en esta carpeta. Una fila por evento, **siempre con su fuente**. Fuentes sugeridas: base DesInventar del Ecuador, informes de situación de la Secretaría Nacional de Gestión de Riesgos, registros de los GAD y prensa local con fecha.
+Plantilla en esta carpeta. Una fila por evento, **siempre con su fuente**.
+
+| Fuente | Periodo | Cómo se usa |
+|---|---|---|
+| ECU 911, [Base de Emergencias](https://www.datosabiertos.gob.ec/dataset/base-de-emergencias) (Datos Abiertos) | julio de 2021 en adelante | **Automática** en `RD1_02` (`USAR_ECU911`): incidentes diarios de gestión de riesgos por parroquia; fecha y lugar, sin daños. Queda en `RD1_02_ecu911_<zona>.csv` |
+| [DesInventar, Ecuador](https://db.desinventar.org/DesInventar/country_profile.jsp?countrycode=ecu&lang=ES) (UNDRR) | 1970–2007 | A mano: eventos con daños, incluidos El Niño 1982–83 y 1997–98 |
+| [Informes de situación (SitRep) de la SNGR](https://www.gestionderiesgos.gob.ec/informes-de-situacion-actual-por-eventos-adversos-ecuador/) | 2016–2026 | A mano: afectados, viviendas y fallecidos por cantón |
+| GAD y prensa local con fecha | variable | A mano: completar vacíos, en especial 2008–2015, que no tiene base pública por evento |
+
+El conjunto «Eventos Peligrosos» que la SNGR publicaba en Datos Abiertos ya no está disponible en el portal (consulta del 22 de octubre de 2026).
 
 | Columna | Contenido |
 |---|---|

@@ -12,7 +12,9 @@ Los datos se obtienen con los cuadernos comunes a las dos carreras ([`practicas/
 |---|---|---|---|
 | 1 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/ambiental/practica-1/IA1_01_climatologia.ipynb) `IA1_01_climatologia` | Climatología 1995–2014 de las 9 variables con ERA5 y CORe; climograma; humedad, presión y viento; diferencias entre reanálisis | `IA1_01_*` |
 | 2 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/ambiental/practica-1/IA1_02_estacion_vs_reanalisis.ipynb) `IA1_02_estacion_vs_reanalisis` | Contraste de una estación con los dos reanálisis en todas las variables que mida; métricas mensuales y diarias | `IA1_02_*` |
-| 3 | Próximamente | Tendencias y compuestos por fase de ENSO | Borrador del capítulo 1 |
+| 3 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/ambiental/practica-1/IA1_03_tendencias_enso.ipynb) `IA1_03_tendencias_enso` | Tendencias 1981–2024 (Sen y Mann-Kendall corregido por autocorrelación), prueba sin los años de El Niño, tendencia según el año de inicio, compuestos mensuales por fase de ENSO, señal/ruido y estado actual de ENSO. Evaluación formativa | `IA1_03_*` |
+
+Con los productos de los tres pasos se arma el capítulo 1 con la [plantilla](capitulo-1_plantilla.md): el borrador es la evaluación formativa y el capítulo corregido, la sumativa (estudio de casos). El evento El Niño en curso va en la [bitácora](../../comun/bitacora/), como anexo.
 
 Datos de estación: formato común en [`practicas/comun/estaciones`](../../comun/estaciones/).
 
