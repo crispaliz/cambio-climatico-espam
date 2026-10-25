@@ -304,7 +304,7 @@ def meses_diarios(anios, recuadro, carpeta_meses, hilos: int = 4, avance: bool =
                              encoding={v: {"zlib": True, "complevel": 4, "dtype": "float32"} for v in ds.data_vars})
                 f.with_suffix(".parcial").rename(f)
                 hechos += 1
-                if avance and (hechos in (1, 3) or k % 12 == 0 or k == len(meses)):
+                if avance and (hechos in (1, 3) or k % 12 == 0 or k == len(meses) or len(meses) <= 12):
                     por_mes = (time.time() - t0) / hechos
                     print(f"  {etiqueta}: {k}/{len(meses)} meses · {por_mes / 60:.1f} min por mes · "
                           f"faltan ~{por_mes * (len(meses) - k) / 3600:.1f} h")
@@ -345,7 +345,8 @@ def diario_zona(area, anios, carpeta_datos, slug: str, hilos: int = 4, avance: b
     return {"diario": f_d, "mensual": f_m}
 
 
-def preparar_diario(anios, carpeta_trabajo, carpeta_salida, hilos: int = 4, recuadro=RECUADRO_ECUADOR) -> list[pathlib.Path]:
+def preparar_diario(anios, carpeta_trabajo, carpeta_salida, hilos: int = 4, recuadro=RECUADRO_ECUADOR,
+                    avance: bool = False) -> list[pathlib.Path]:
     """(Docente) Un NetCDF diario por año para Ecuador. Reanudable por mes."""
     import xarray as xr
 
@@ -356,7 +357,7 @@ def preparar_diario(anios, carpeta_trabajo, carpeta_salida, hilos: int = 4, recu
         f = carpeta_salida / f"core_ecuador_diario_{a}.nc"
         if not f.exists():
             t0 = time.time()
-            rutas = meses_diarios([a], recuadro, pathlib.Path(carpeta_trabajo) / "meses", hilos, avance=False)
+            rutas = meses_diarios([a], recuadro, pathlib.Path(carpeta_trabajo) / "meses", hilos, avance=avance, etiqueta=f"CORe {a}")
             ds = juntar(rutas)
             ds.attrs = {"title": f"CORe diario para Ecuador, {a}",
                         "source": "NOAA/NCEP CPC, CORe, CDAS look-alike, flujos de 6 h (GRIB1, T62)",

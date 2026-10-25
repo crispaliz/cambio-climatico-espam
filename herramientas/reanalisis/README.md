@@ -69,7 +69,7 @@ CORe se distribuye en archivos **globales** de 6 h, así que el costo no depende
 
 1. Una sola vez: *Settings › Secrets and variables › Actions › New repository secret*, nombre `CDSAPI_KEY`, valor: el API Token del Climate Data Store del docente (con las licencias de ERA5 aceptadas).
 2. Parámetros en `datos/release.json` (etiqueta, periodo, fuentes, provincias). Al subir un cambio de ese archivo, el flujo se ejecuta solo; también se puede lanzar desde *Actions › Release de datos › Run workflow*.
-3. Trabajos: `plan` → `era5` (24 provincias, 4 a la vez) y `core-anio` (44 años, 3 a la vez) → `core-provincias` → `publicar`. Duración aproximada: 3 a 5 horas.
+3. Trabajos: `plan` → `era5` (24 provincias, 4 a la vez) y `core-anio` (44 años, 6 a la vez) → `core-provincias` → `publicar`. Duración aproximada: unas 8 a 12 horas, casi todo CORe (1 a 1,5 h por año).
 4. Si algún trabajo falla, *Re-run failed jobs* repite solo esos y vuelve a publicar; los archivos ya publicados con el mismo tamaño no se suben de nuevo.
 
 El código es `herramientas/reanalisis/ci.py`, que llama a las mismas funciones que `preparar_releases.py` y que la opción A de los estudiantes.

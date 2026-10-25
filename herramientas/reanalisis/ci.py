@@ -78,7 +78,7 @@ def era5_provincia(c, slug: str, salida, trabajo) -> list[pathlib.Path]:
 def core_anio(c, anio: int, salida, trabajo) -> list[pathlib.Path]:
     from herramientas.reanalisis import core
 
-    return core.preparar_diario([anio], trabajo, salida, hilos=int(c["hilos_core"]))
+    return core.preparar_diario([anio], trabajo, salida, hilos=int(c["hilos_core"]), avance=True)
 
 
 def core_provincias(c, entrada, salida) -> list[pathlib.Path]:
