@@ -1,0 +1,10 @@
+{
+  "etiqueta": "datos-v1",
+  "periodo": [1981, 2024],
+  "fuentes": ["era5", "core"],
+  "provincias": "todas",
+  "inicio_dia": 0,
+  "hilos_core": 2,
+  "reemplazar": false,
+  "nota": "Al cambiar y subir este archivo, GitHub Actions regenera y publica el release (.github/workflows/datos-release.yml)."
+}

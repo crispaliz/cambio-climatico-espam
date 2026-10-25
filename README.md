@@ -92,6 +92,7 @@ Cada persona usa su propia cuenta: el CDS limita las solicitudes por cuenta y un
 |---|---|
 | `herramientas/reanalisis/preparar_releases.ipynb` (Colab) | Release `datos-v1`: por provincia, `era5_diario`, `era5_mensual`, `era5_terreno`, `core_diario`, `core_mensual` y `manifiesto.json` |
 | `python -m herramientas.reanalisis.preparar_releases` (terminal) | Lo mismo, para correrlo en un equipo propio |
+| **GitHub Actions** (`.github/workflows/datos-release.yml`), recomendado | Lo mismo, en los servidores de GitHub: ERA5 una provincia por trabajo y CORe un año por trabajo, en paralelo, y publica el release al final. Se lanza al subir un cambio de `datos/release.json` o desde *Actions › Release de datos › Run workflow*. Necesita el secreto del repositorio `CDSAPI_KEY` |
 
 Usa el mismo código que la opción A de los estudiantes. Es reanudable: si se corta, se vuelve a ejecutar y sigue donde quedó.
 

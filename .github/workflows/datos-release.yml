@@ -1,0 +1,131 @@
+# Release de datos de reanálisis por provincia (opción B de los cuadernos comunes).
+# © 2026 Cristian Omar Paliz Acosta · ESPAM MFL
+#
+# Se ejecuta al subir un cambio de datos/release.json o a mano (Actions › Release de datos › Run workflow).
+# Requiere el secreto del repositorio CDSAPI_KEY (token personal del Climate Data Store del docente).
+# ERA5: una provincia por trabajo. CORe: un año por trabajo. Al final, un solo release con todo.
+
+name: Release de datos
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["datos/release.json"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: datos-release
+  cancel-in-progress: false
+
+env:
+  PYTHONUNBUFFERED: "1"
+  DEPENDENCIAS: "cdsapi eccodes xarray netCDF4 pandas numpy scipy geopandas shapely requests"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      provincias: ${{ steps.plan.outputs.provincias }}
+      anios: ${{ steps.plan.outputs.anios }}
+      era5: ${{ steps.plan.outputs.era5 }}
+      core: ${{ steps.plan.outputs.core }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip, cache-dependency-path: .github/workflows/datos-release.yml}
+      - run: pip install -q $DEPENDENCIAS
+      - id: plan
+        run: python -m herramientas.reanalisis.ci plan
+
+  era5:
+    needs: plan
+    if: needs.plan.outputs.era5 == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 4          # el CDS limita las solicitudes simultáneas por cuenta
+      matrix:
+        provincia: ${{ fromJSON(needs.plan.outputs.provincias) }}
+    name: ERA5 ${{ matrix.provincia.nombre }} (${{ matrix.provincia.celdas }} celdas)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip, cache-dependency-path: .github/workflows/datos-release.yml}
+      - run: pip install -q $DEPENDENCIAS
+      - run: python -m herramientas.reanalisis.ci era5 --slug "${{ matrix.provincia.slug }}"
+        env:
+          CDSAPI_KEY: ${{ secrets.CDSAPI_KEY }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: era5-${{ matrix.provincia.slug }}
+          path: salida/*.nc
+          retention-days: 7
+          if-no-files-found: error
+
+  core-anio:
+    needs: plan
+    if: needs.plan.outputs.core == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 3          # servidor público de NOAA: 3 trabajos × 2 hilos
+      matrix:
+        anio: ${{ fromJSON(needs.plan.outputs.anios) }}
+    name: CORe ${{ matrix.anio }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip, cache-dependency-path: .github/workflows/datos-release.yml}
+      - run: pip install -q $DEPENDENCIAS
+      - run: python -m herramientas.reanalisis.ci core-anio --anio ${{ matrix.anio }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: core-anual-${{ matrix.anio }}
+          path: salida/core_ecuador_diario_*.nc
+          retention-days: 7
+          if-no-files-found: error
+
+  core-provincias:
+    needs: [plan, core-anio]
+    if: needs.plan.outputs.core == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip, cache-dependency-path: .github/workflows/datos-release.yml}
+      - run: pip install -q $DEPENDENCIAS
+      - uses: actions/download-artifact@v4
+        with: {pattern: core-anual-*, path: anuales, merge-multiple: true}
+      - run: python -m herramientas.reanalisis.ci core-provincias
+      - uses: actions/upload-artifact@v4
+        with:
+          name: core-provincias
+          path: salida/*.nc
+          retention-days: 7
+          if-no-files-found: error
+
+  publicar:
+    needs: [plan, era5, core-provincias]
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip, cache-dependency-path: .github/workflows/datos-release.yml}
+      - run: pip install -q $DEPENDENCIAS
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with: {pattern: era5-*, path: salida, merge-multiple: true}
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with: {name: core-provincias, path: salida}
+      - run: python -m herramientas.reanalisis.ci publicar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
