@@ -10,6 +10,17 @@ Registros de eventos peligrosos para contrastarlos con la lluvia y la temperatur
 
 **Compilado del docente (recomendado).** `python -m herramientas.eventos.preparar_ecu911` en Colab deja `datos/eventos/ecu911_gestion_riesgos.csv.gz` con todo el país (unos 10–20 minutos). Subido al repositorio en esa ruta, `RD1_02` lo usa directamente y los estudiantes no descargan nada del portal.
 
+## Compilado nacional
+
+`datos/eventos/ecu911_gestion_riesgos.csv.gz`: 51 305 incidentes climáticos de gestión de riesgos de todo el país, de julio de 2021 a septiembre de 2026, descargados el 24 de octubre de 2026 de los 63 archivos mensuales publicados. Particularidades de la fuente:
+
+| Particularidad | Efecto |
+|---|---|
+| Enero de 2024 incompleto en el archivo publicado (≈40 incidentes frente a ≈800 de un mes típico) | Es un vacío de la fuente, no un mes sin eventos |
+| Febrero de 2023 sin subtipo | Sus 911 incidentes quedan como «gestión de riesgos sin detalle» |
+| En la Costa casi todo viene como «Amenazas naturales» (en Manabí, 985 de 1 095) | El tipo se interpreta con la época del año y la lluvia de esos días |
+| En la Sierra, «Incendio forestal» domina de julio a noviembre | Estacionalidad de la temporada seca |
+
 ## Fuentes que se consultan a mano
 
 | Fuente | Periodo | Uso |

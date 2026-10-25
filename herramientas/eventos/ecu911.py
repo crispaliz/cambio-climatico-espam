@@ -9,6 +9,14 @@ cantón, código y nombre de la parroquia, servicio y subtipo. Aquí se conserva
 «Gestión de Riesgos» y, de ellos, los de origen hidrometeorológico o climático (inundación,
 deslizamiento, vendaval, incendio forestal, etc.).
 
+Particularidades de la fuente (revisadas con los 63 meses publicados, julio de 2021 a septiembre de 2026):
+  - Enero de 2024 está incompleto en el archivo publicado (unos 40 incidentes climáticos frente a ~800
+    de un mes típico): no es un mes tranquilo, es un vacío de la fuente.
+  - Febrero de 2023 se publicó sin subtipo (todo «Gestión de Riesgos»).
+  - En la Costa (Manabí, por ejemplo) casi todos los incidentes vienen como «Amenazas naturales», sin
+    especificar inundación o deslizamiento; en la Sierra, «Incendio forestal» domina entre julio y
+    noviembre. Interprete el subtipo genérico con la época del año y la lluvia de esos días.
+
 Qué es y qué no es:
   - Es un registro diario y por parroquia de CUÁNDO y DÓNDE se pidió o coordinó atención: sirve para
     fechar eventos y contrastarlos con la lluvia.
@@ -46,11 +54,14 @@ TIPOS = [
     (r"oleaje|aguaje|marejada", "oleaje"),
     (r"sequ|deficit hidrico", "sequía"),
     (r"tormenta|granizo|lluvia|hidrometeor", "lluvia intensa o tormenta"),
-    (r"hundimiento|subsidencia|socavon", "hundimiento"),
+    (r"hundimiento|subsidencia|socav", "hundimiento"),
     (r"amenazas? natural", "amenaza natural sin detalle"),
+    (r"^gestion de riesgos$", "gestión de riesgos sin detalle"),
 ]
 # «Amenazas naturales» es un subtipo genérico del ECU 911 que puede incluir sismos u otros eventos no
 # climáticos: se conserva porque en la época lluviosa suele ser la mayoría, pero hay que verificarlo.
+# En algunos meses (todo febrero de 2023) el subtipo solo repite «Gestión de Riesgos»: se conserva como
+# «gestión de riesgos sin detalle», que puede incluir eventos no climáticos (antrópicos, tecnológicos).
 
 
 def _sin_tildes(t: str) -> str:
@@ -109,7 +120,7 @@ def filtrar(df: pd.DataFrame) -> pd.DataFrame:
     df["cod_parroquia"] = df["cod_parroquia"].astype(str).str.strip().str.replace(r"\.0$", "", regex=True).str.zfill(6)
     for c in ("provincia", "canton", "parroquia", "subtipo"):
         df[c] = df[c].astype(str).str.strip()
-    return df.dropna(subset=["fecha"])
+    return df[df["cod_parroquia"].str.fullmatch(r"\d{6}")].dropna(subset=["fecha"])
 
 
 def incidentes(carpeta=None, desde: str = "2021-07", hasta: str | None = None, nacional=None,
