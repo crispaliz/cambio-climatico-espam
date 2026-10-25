@@ -10,7 +10,7 @@
 | `MODO_DATOS` | Qué hace | Necesita | Tiempo |
 |---|---|---|---|
 | `"propio"` (opción A) | Descarga ERA5 y CORe, diarios y mensuales, para su zona | Su propia cuenta y token del CDS | ERA5: ~0,5–1 min por celda (Manabí: 39; un cantón: 4–10). CORe diario: 4–8 h (`CORE_DIARIO` sin marcar: solo mensual, minutos). Reanudable |
-| `"release"` (opción B) | Trae los archivos preparados por el docente y los recorta a su zona | Nada | 1–2 min |
+| `"release"` (opción B, predeterminada) | Trae los archivos del release `datos-v1` y los recorta a su zona | Nada | 1–2 min |
 
 **Opción A:** cuenta propia en https://cds.climate.copernicus.eu, licencias aceptadas de *ERA5 hourly time-series data on single levels* y *ERA5 monthly averaged data on single levels*, y API Token en Colab › Secrets (`CDSAPI_KEY`) o en `CDS_TOKEN`. Una cuenta por persona: el CDS limita por cuenta.
 

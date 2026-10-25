@@ -30,7 +30,7 @@ datos/                archivos pequeños y fijos (límites)
 
 Los datos grandes (reanálisis, salidas de modelos) no se guardan en el repositorio. Hay dos formas de obtenerlos, y las dos dejan los mismos archivos en el Drive del estudiante:
 
-| | Opción A: `MODO_DATOS = "propio"` | Opción B: `MODO_DATOS = "release"` |
+| | Opción A: `MODO_DATOS = "propio"` | Opción B: `MODO_DATOS = "release"` (predeterminada) |
 |---|---|---|
 | Quién descarga | Cada estudiante, con su cuenta del CDS, en su Colab | El docente, una vez, para todas las provincias |
 | Dónde | Su Drive, solo su zona | Release `datos-v1` del repositorio; el estudiante trae su provincia y la recorta |

@@ -203,15 +203,45 @@ def tendencia(s: pd.Series) -> dict:
             "significativa_5%": bool(mk["p_valor"] < 0.05)}
 
 
+def ajustar_gev(x) -> tuple[float, float, float]:
+    """GEV por máxima verosimilitud generalizada (GMLE; Martins y Stedinger, 2000, Water Resour. Res. 36: 737–744).
+
+    Con 30–45 máximos anuales la máxima verosimilitud sin restricción da a veces formas extremas y colas
+    absurdas. La GMLE multiplica la verosimilitud por una previa Beta(6, 9) sobre la forma ξ en (−0,5; 0,5),
+    centrada en una cola ligeramente pesada (ξ ≈ 0,1), típica de la lluvia. Devuelve (c, posición, escala)
+    en la convención de scipy, donde c = −ξ.
+    """
+    from scipy import optimize, stats
+
+    x = np.asarray(x, dtype=float)
+    s = x.std(ddof=1)
+    escala0 = max(s * np.sqrt(6) / np.pi, 1e-6)
+    inicio = np.array([-0.1, x.mean() - 0.5772 * escala0, np.log(escala0)])
+
+    def costo(th):
+        c, loc, lesc = th
+        xi = -c
+        if not -0.5 < xi < 0.5:
+            return np.inf
+        ll = stats.genextreme.logpdf(x, c, loc, np.exp(lesc)).sum()
+        if not np.isfinite(ll):
+            return np.inf
+        return -(ll + 5 * np.log(0.5 + xi) + 8 * np.log(0.5 - xi))
+
+    r = optimize.minimize(costo, inicio, method="Nelder-Mead", options={"xatol": 1e-6, "fatol": 1e-8, "maxiter": 4000})
+    c, loc, lesc = r.x
+    return float(c), float(loc), float(np.exp(lesc))
+
+
 def retorno(maximos: pd.Series, periodos=(2, 5, 10, 25, 50, 100), remuestreos: int = 300, semilla: int = 1) -> pd.DataFrame:
-    """Niveles de retorno con una distribución GEV ajustada a los máximos anuales, e intervalo del 90 %
-    por remuestreo. Con 30–45 años, los periodos mayores de ~50 años son extrapolaciones."""
+    """Niveles de retorno con una GEV ajustada a los máximos anuales (GMLE, ver `ajustar_gev`), e intervalo
+    del 90 % por remuestreo. Con 30–45 años, los periodos mayores de ~50 años son extrapolaciones."""
     from scipy import stats
 
     x = maximos.dropna().values
     if len(x) < MIN_ANIOS_RETORNO:
         raise ValueError(f"Solo {len(x)} máximos anuales: se necesitan al menos {MIN_ANIOS_RETORNO} para ajustar una GEV.")
-    c, loc, esc = stats.genextreme.fit(x)
+    c, loc, esc = ajustar_gev(x)
     prob = 1 - 1 / np.asarray(periodos, dtype=float)
     nivel = stats.genextreme.ppf(prob, c, loc, esc)
     rng = np.random.default_rng(semilla)
@@ -219,14 +249,15 @@ def retorno(maximos: pd.Series, periodos=(2, 5, 10, 25, 50, 100), remuestreos: i
     for _ in range(remuestreos):
         m = rng.choice(x, len(x), replace=True)
         try:
-            boot.append(stats.genextreme.ppf(prob, *stats.genextreme.fit(m)))
+            boot.append(stats.genextreme.ppf(prob, *ajustar_gev(m)))
         except Exception:
             pass
     boot = np.array(boot)
     out = pd.DataFrame({"periodo_anios": periodos, "nivel": nivel.round(1),
                         "inf_5%": np.nanpercentile(boot, 5, axis=0).round(1),
                         "sup_95%": np.nanpercentile(boot, 95, axis=0).round(1)}).set_index("periodo_anios")
-    out.attrs["gev"] = {"forma_c": round(c, 3), "posicion": round(loc, 2), "escala": round(esc, 2), "n_anios": len(x)}
+    out.attrs["gev"] = {"forma_xi": round(-c, 3), "posicion": round(loc, 2), "escala": round(esc, 2), "n_anios": len(x),
+                        "metodo": "GMLE, previa Beta(6, 9) en ξ (Martins y Stedinger, 2000)"}
     return out
 
 
