@@ -36,6 +36,60 @@ def de_provincia(provincia: str, repo_dir) -> pd.DataFrame:
     return t.sort_values("meses_tmax", ascending=False)
 
 
+NINGUNA = ("ninguna", "ninguno", "no", "sin estacion", "sin estación")
+
+
+def candidatas(zona: dict, repo_dir, recuadro=None) -> pd.DataFrame:
+    """Estaciones del curso utilizables para la zona elegida, de la mejor a la peor.
+
+    Para una provincia: las de la provincia. Para un cantón: las que caen dentro del recuadro
+    descargado (`recuadro` = [N, O, S, E]); primero las que están dentro del cantón.
+    Orden: primero las que están dentro de la zona, con más meses válidos en total (Tmáx + Tmín + lluvia);
+    después las de fuera, de la más cercana a la más lejana (primero las que tienen 60 meses válidos o más).
+    """
+    import geopandas as gpd
+
+    t = tabla(repo_dir)
+    pts = gpd.GeoSeries(gpd.points_from_xy(t["lon"], t["lat"]), crs=4326)
+    geom = zona["geom"]
+    t["dentro"] = pts.within(geom).values
+    c = geom.centroid
+    t["dist_km"] = (((t["lat"] - c.y) ** 2 + ((t["lon"] - c.x) * 0.9998) ** 2) ** 0.5 * 111.2).round(1)
+    if zona.get("tipo") == "provincia":
+        t = t[t["provincia"].map(_norm) == _norm(zona["provincia"])]
+    elif recuadro is not None:
+        n, o, s, e = recuadro
+        t = t[t["lat"].between(s, n) & t["lon"].between(o, e)]
+    else:
+        t = t[t["dentro"]]
+    t = t.assign(meses=t[["meses_tmax", "meses_tmin", "meses_precip"]].sum(axis=1))
+    t = t[t["meses"] > 0]
+    dentro = t[t["dentro"]].sort_values(["meses", "dist_km"], ascending=[False, True])
+    fuera = t[~t["dentro"]].assign(_corta=lambda d: d["meses"] < 60)   # fuera de la zona manda la cercanía,
+    fuera = fuera.sort_values(["_corta", "dist_km"]).drop(columns="_corta")  # entre las de 60 meses o más
+    return pd.concat([dentro, fuera])
+
+
+def elegir(archivo: str, zona: dict, repo_dir, recuadro=None):
+    """Como `resolver`, pero si `archivo` está vacío elige sola la mejor estación del curso para la zona.
+
+    Devuelve (ruta, ficha) o (None, None) si el usuario escribió «ninguna» o no hay estación del curso.
+    """
+    archivo = str(archivo or "").strip()
+    if _norm(archivo) in NINGUNA:
+        return None, None
+    if archivo:
+        return resolver(archivo, repo_dir, zona.get("provincia"))
+    c = candidatas(zona, repo_dir, recuadro)
+    if c.empty:
+        return None, None
+    print("Estaciones del curso para esta zona (se usa la primera; para elegir otra, escriba su archivo en ARCHIVO_ESTACION):")
+    for _, r in c.iterrows():
+        print(f"  {r['archivo']:55s} {r['estacion']} · Tmáx {r['meses_tmax']} · Tmín {r['meses_tmin']} · lluvia {r['meses_precip']} meses · {r['dist_km']:.0f} km del centro")
+    f = c.iloc[0]
+    return pathlib.Path(repo_dir) / CARPETA / f["archivo"], f
+
+
 def resolver(archivo: str, repo_dir, provincia: str | None = None):
     """Devuelve (ruta, ficha). `ficha` es la fila del índice si el archivo es del catálogo; si no, None.
 

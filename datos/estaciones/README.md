@@ -4,14 +4,36 @@ Series diarias de **40 estaciones** del Ecuador en el formato común del curso (
 
 ## Cómo se usan
 
-En la celda 1 del cuaderno, escriba en `ARCHIVO_ESTACION` el valor de la columna `archivo` del índice, por ejemplo:
+**No hay que hacer nada.** Con `ARCHIVO_ESTACION` vacío (como viene), el cuaderno elige sola la estación del curso con más datos para la zona del formulario, completa nombre, código, coordenadas y altitud, y muestra la lista de las demás estaciones disponibles:
 
-```python
-ARCHIVO_ESTACION = "manabi_calceta_espam.csv"
-ARCHIVO_ESTACION = "synop/guayas_milagro_84202.csv"
-```
+- **Provincia:** la estación de la provincia con más meses válidos (Tmáx + Tmín + lluvia).
+- **Cantón:** primero las que están dentro del cantón (la de más meses); si no hay, la más cercana dentro del área descargada, entre las que tienen 60 meses válidos o más.
 
-No hay que subir nada a Drive: el cuaderno lee el archivo desde el repositorio y completa solo el nombre, el código, las coordenadas y la altitud. Si deja `ARCHIVO_ESTACION` vacío, el cuaderno le muestra las estaciones de su provincia.
+Para usar otra, escriba en `ARCHIVO_ESTACION` el valor de la columna `archivo` del índice (por ejemplo, `"synop/guayas_milagro_84202.csv"`), o la ruta en Drive de un CSV propio. En `RD1_02`, `"ninguna"` trabaja sin estación.
+
+| Provincia | Estación elegida |
+|---|---|
+| Azuay | Mariscal Lamar (Cuenca) |
+| Cañar | Cañar |
+| Carchi | San Gabriel |
+| Chimborazo | Chimborazo |
+| Cotopaxi | Cotopaxi (aeropuerto) |
+| El Oro | Santa Rosa (aeropuerto) |
+| Esmeraldas | La Concordia |
+| Guayas | Guayaquil (aeropuerto José Joaquín de Olmedo) |
+| Imbabura | Inguincho |
+| Loja | La Argelia |
+| Los Ríos | Pichilingue |
+| Manabí | ESPAM MFL, Calceta |
+| Morona Santiago | Macas (aeropuerto) |
+| Orellana | Nuevo Rocafuerte |
+| Pastaza | Puyo |
+| Pichincha | Quito (aeropuerto Mariscal Sucre) |
+| Santa Elena | General Ulpiano Páez (Salinas) |
+| Santo Domingo de los Tsáchilas | Puerto Ila |
+| Sucumbíos | Nueva Loja (aeropuerto) |
+| Tungurahua | Querochaca |
+| Bolívar, Galápagos, Napo, Zamora Chinchipe | Sin estación del curso |
 
 ## Índice: [`indice_estaciones.csv`](indice_estaciones.csv)
 
