@@ -2,6 +2,8 @@
 
 Formato único para todas las prácticas que usan estaciones (Ambiental `IA1_02`, Riesgos `RD1_02` y las que vengan). Plantilla: [`plantilla_estacion.csv`](plantilla_estacion.csv).
 
+**Estaciones listas para usar:** el curso trae 40 estaciones en este formato, en [`datos/estaciones`](../../../datos/estaciones/). En el cuaderno basta escribir en `ARCHIVO_ESTACION` el nombre del archivo que indica su índice; no hay que subir nada.
+
 | Columna | Contenido | Unidad |
 |---|---|---|
 | `fecha` | AAAA-MM-DD (diario) o AAAA-MM-01 (mensual) | — |

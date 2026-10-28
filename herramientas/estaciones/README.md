@@ -8,3 +8,9 @@
 - `metricas(obs, mod, relativa)`: sesgo, MAE, RMSE, r y sesgo relativo.
 
 Una celda vacía es un dato faltante. Nunca se escribe 0 donde no hubo medición.
+
+`catalogo.py`
+
+- `tabla(repo_dir)`: índice de `datos/estaciones/`.
+- `de_provincia(provincia, repo_dir)`: estaciones del curso de una provincia.
+- `resolver(archivo, repo_dir, provincia)`: devuelve la ruta y la ficha de una estación del curso, o la ruta de un CSV propio; si no lo encuentra, explica qué escribir y lista las estaciones de la provincia.
