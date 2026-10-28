@@ -1,70 +1,78 @@
 # Estaciones del curso
 
-Series diarias de **40 estaciones** del Ecuador en el formato común del curso (`practicas/comun/estaciones/plantilla_estacion.csv`), listas para `IA1_02_estacion_vs_reanalisis` (Ambiental) y `RD1_02_extremos_eventos` (Riesgos de Desastres). Periodo: de 2001 (2010 en la ESPAM) a diciembre de 2024, el mismo final de los reanálisis del curso.
+Series diarias de **1023 estaciones** del Ecuador continental en el formato común del curso (`practicas/comun/estaciones/plantilla_estacion.csv`), para `IA1_02_estacion_vs_reanalisis` (Ambiental) y `RD1_02_extremos_eventos` (Riesgos de Desastres).
 
 ## Cómo se usan
 
-**No hay que hacer nada.** Con `ARCHIVO_ESTACION` vacío (como viene), el cuaderno elige sola la estación del curso con más datos para la zona del formulario, completa nombre, código, coordenadas y altitud, y muestra la lista de las demás estaciones disponibles:
+**No hay que hacer nada.** Con `ARCHIVO_ESTACION` vacío (como viene), el cuaderno elige sola la estación del curso para la zona del formulario, completa nombre, código, coordenadas y altitud, y muestra las demás disponibles:
 
-- **Provincia:** la estación de la provincia con más meses válidos (Tmáx + Tmín + lluvia).
-- **Cantón:** primero las que están dentro del cantón (la de más meses); si no hay, la más cercana dentro del área descargada, entre las que tienen 60 meses válidos o más.
+1. Primero las estaciones dentro de la zona; si no hay (cantones pequeños), las más cercanas dentro del área descargada.
+2. Entre ellas, primero las que tienen **temperatura y lluvia** (60 meses válidos o más de lluvia y de Tmáx o Tmín), luego las que solo tienen temperatura y al final las que solo tienen lluvia.
+3. A igualdad, la de más meses válidos.
 
-Para usar otra, escriba en `ARCHIVO_ESTACION` el valor de la columna `archivo` del índice (por ejemplo, `"synop/guayas_milagro_84202.csv"`), o la ruta en Drive de un CSV propio. En `RD1_02`, `"ninguna"` trabaja sin estación.
+Para usar otra, escriba en `ARCHIVO_ESTACION` el valor de la columna `archivo` del índice (por ejemplo, `"inamhi/manabi/m0005.csv"`), o la ruta en Drive de un CSV propio. En `RD1_02`, `"ninguna"` trabaja sin estación.
 
-| Provincia | Estación elegida |
-|---|---|
-| Azuay | Mariscal Lamar (Cuenca) |
-| Cañar | Cañar |
-| Carchi | San Gabriel |
-| Chimborazo | Chimborazo |
-| Cotopaxi | Cotopaxi (aeropuerto) |
-| El Oro | Santa Rosa (aeropuerto) |
-| Esmeraldas | La Concordia |
-| Guayas | Guayaquil (aeropuerto José Joaquín de Olmedo) |
-| Imbabura | Inguincho |
-| Loja | La Argelia |
-| Los Ríos | Pichilingue |
-| Manabí | ESPAM MFL, Calceta |
-| Morona Santiago | Macas (aeropuerto) |
-| Orellana | Nuevo Rocafuerte |
-| Pastaza | Puyo |
-| Pichincha | Quito (aeropuerto Mariscal Sucre) |
-| Santa Elena | General Ulpiano Páez (Salinas) |
-| Santo Domingo de los Tsáchilas | Puerto Ila |
-| Sucumbíos | Nueva Loja (aeropuerto) |
-| Tungurahua | Querochaca |
-| Bolívar, Galápagos, Napo, Zamora Chinchipe | Sin estación del curso |
+| Provincia | Estación que se elige | Variables | Estaciones disponibles |
+|---|---|---|---|
+| Azuay | Mariscal Lamar | temperatura y lluvia | 50 |
+| Bolívar | Rio San Antonio-Monjas | lluvia | 30 |
+| Carchi | San Gabriel | temperatura y lluvia | 30 |
+| Cañar | Canar | temperatura y lluvia | 35 |
+| Chimborazo | Chimborazo | lluvia | 64 |
+| Cotopaxi | Alternativo Cotopaxi Intl | temperatura y lluvia | 54 |
+| El Oro | Santa Rosa Aeropuerto | temperatura | 52 |
+| Esmeraldas | La Concordia | temperatura y lluvia | 33 |
+| Guayas | Simon Bolivar Intl / Jose Joaquin De Olmedo Intl | temperatura y lluvia | 74 |
+| Imbabura | Inguincho | temperatura y lluvia | 64 |
+| Loja | Loja/La Argelia | temperatura y lluvia | 84 |
+| Los Ríos | Pichilingue | temperatura y lluvia | 33 |
+| Manabí | Manta Aeropuerto Eloy Alfaro (METAR) | temperatura y lluvia | 95 |
+| Morona Santiago | Coronel Edmundo Carvajal | lluvia | 33 |
+| Napo | Baeza | lluvia | 39 |
+| Orellana | Nuevo Rocafuerte | temperatura y lluvia | 12 |
+| Pastaza | Puyo | temperatura y lluvia | 11 |
+| Pichincha | Izobamba | temperatura y lluvia | 120 |
+| Santa Elena | General Ulpiano Paez | temperatura y lluvia | 24 |
+| Santo Domingo de los Tsáchilas | Puerto Ila | temperatura y lluvia | 18 |
+| Sucumbíos | Nueva Loja Aeropuer | temperatura | 17 |
+| Tungurahua | Querochaca | temperatura y lluvia | 32 |
+| Zamora Chinchipe | Zamora | lluvia | 19 |
+| Galápagos | — | — | 0 |
 
 ## Índice: [`indice_estaciones.csv`](indice_estaciones.csv)
 
 | Columna | Contenido |
 |---|---|
 | `archivo` | Lo que se escribe en `ARCHIVO_ESTACION` |
-| `provincia`, `estacion`, `omm`, `codigo` | Ubicación, nombre, indicativo OMM y código INAMHI (o indicativo de OGIMET si no lo hay) |
+| `provincia`, `estacion`, `omm`, `codigo` | Ubicación, nombre, indicativo OMM y código INAMHI |
 | `lat`, `lon`, `altitud_m` | Coordenadas en grados decimales y altitud en metros |
 | `desde`, `hasta` | Primer y último día con dato |
-| `meses_tmax`, `meses_tmin`, `meses_precip` | Meses que pasan el control de completitud de los cuadernos (temperatura: máximo 4 días faltantes y 2 seguidos; lluvia: mes completo) |
-| `variables`, `fuente`, `url` | Columnas del archivo, fuente y enlace directo |
+| `meses_tmax`, `meses_tmin`, `meses_precip` | Meses de 1981 en adelante que pasan el control de completitud de los cuadernos (temperatura: máximo 4 días faltantes y 2 seguidos; lluvia: mes completo) |
+| `variables`, `fuente`, `url` | Columnas del archivo, fuente y enlace de descarga |
 
 ## Fuentes
 
-| Archivos | Fuente | Variables |
-|---|---|---|
-| `synop/*.csv` (38 estaciones, 23 provincias) | Mensajes SYNOP del Sistema Mundial de Telecomunicaciones de la OMM, obtenidos de OGIMET (https://www.ogimet.com) y resumidos por día | `tmax`, `tmin`, `precip` |
-| `manabi_calceta_espam.csv` | Estación meteorológica de la ESPAM MFL, Calceta (cantón Bolívar, Manabí), 2010–2024, con control de calidad | `tmed`, `tmax`, `tmin`, `precip`, `hr`, `vv` |
-| `manabi_manta_aeropuerto_semt_metar.csv` | Mensajes METAR del aeropuerto de Manta (SEMT), obtenidos de OGIMET y resumidos por día (días con 12 observaciones o más) | `tmed`, `tmax`, `tmin`, `hr`, `pres`, `vv`, `dv` |
+| Archivos | Fuente | Variables | Periodo |
+|---|---|---|---|
+| `inamhi/<provincia>/<código>.csv` (983 estaciones) | INAMHI. Series con control de calidad y rellenadas con Climatol, con CHIRPS como serie de apoyo | `precip` | 1964–2018 |
+| `synop/*.csv` (38 estaciones) | Mensajes SYNOP del Sistema Mundial de Telecomunicaciones de la OMM, obtenidos de OGIMET y resumidos por día. En 35 de ellas la lluvia es la de la estación del INAMHI del mismo sitio (a 5,5 km o menos y con menos de 100 m de diferencia de altitud) | `tmax`, `tmin`, `precip` | 2001–2024 (lluvia del INAMHI: 1964–2018) |
+| `manabi_manta_aeropuerto_semt_metar.csv` | METAR del aeropuerto de Manta (OGIMET), días con 12 observaciones o más; lluvia de la estación INAMHI M0074 Manta Aeropuerto | `tmed`, `tmax`, `tmin`, `precip`, `hr`, `pres`, `vv`, `dv` | 2006–2024 (lluvia: 1964–2018) |
+| `manabi_calceta_espam.csv` | Estación meteorológica de la ESPAM MFL, Calceta, con control de calidad | `tmed`, `tmax`, `tmin`, `precip`, `hr`, `vv` | 2010–2024 |
 
-En el METAR, la presión es la de la estación, calculada desde el QNH con la ecuación hipsométrica, y las temperaturas máxima y mínima son las de las observaciones horarias (valores enteros).
+**Dónde están.** El índice, las estaciones SYNOP, el METAR y la ESPAM están en esta carpeta de la rama `main`. Las 983 series del INAMHI (unos 62 MB) están en la rama [`estaciones`](https://github.com/crispaliz/cambio-climatico-espam/tree/estaciones), un ZIP por provincia, para que la rama `main` siga siendo liviana: el cuaderno descarga solo el ZIP de la provincia que necesita, una vez por sesión.
 
 **Cómo citar:**
+- INAMHI. *Precipitación diaria de la red de estaciones del Instituto Nacional de Meteorología e Hidrología, 1964–2018*. Control de calidad y relleno con Climatol (serie de apoyo CHIRPS): C. Paliz Acosta.
 - OGIMET. *Datos SYNOP y METAR del Sistema Mundial de Telecomunicaciones de la OMM*. https://www.ogimet.com. Procesados por C. Paliz Acosta (2026).
 - ESPAM MFL. *Estación meteorológica de la ESPAM MFL, Calceta, Manabí. Datos diarios 2010–2024*. Procesados por C. Paliz Acosta (2026).
 
 ## Limitaciones (declárelas en el capítulo)
 
-- **Lluvia de las estaciones SYNOP:** los mensajes no siempre llegan, y un día sin mensaje queda vacío. Como los cuadernos solo aceptan meses de lluvia completos, la mayoría de las estaciones tiene pocos meses válidos de lluvia (0 a 42). Para la lluvia en Manabí use la ESPAM (168 meses).
-- **Definición del día:** los resúmenes SYNOP y METAR siguen el día de la fuente, no necesariamente el día pluviométrico del INAMHI (07:00–07:00).
-- **Coordenadas de la ESPAM:** son aproximadas (−0,83; −80,18; 15 m); se reemplazarán por las de la ficha oficial de la estación.
-- **Sin estación útil:** Bolívar, Napo, Zamora Chinchipe y Galápagos; Imbabura y Chimborazo tienen muy pocos datos. En esas provincias se usa la estación que indique el docente.
+- **Lluvia del INAMHI rellenada:** las series no tienen días faltantes porque los vacíos se rellenaron con Climatol usando CHIRPS como serie de apoyo. Los días rellenados no son observaciones y no se distinguen en el archivo. Terminan en 2018.
+- **Lluvia de las SYNOP sin par del INAMHI:** los mensajes no siempre llegan, y como los cuadernos solo aceptan meses de lluvia completos, esas estaciones tienen pocos meses válidos de lluvia.
+- **Definición del día:** SYNOP y METAR siguen el día de la fuente; la lluvia del INAMHI, el día pluviométrico de 07:00 a 07:00.
+- **Sin temperatura:** Bolívar, Napo y Zamora Chinchipe solo tienen estaciones de lluvia; en Chimborazo y Morona Santiago la temperatura tiene menos de 60 meses válidos, así que también se elige una estación con lluvia. Se probó construir series sintéticas de temperatura interpolando las estaciones vecinas y se descartaron: al reconstruir estaciones conocidas, el sesgo llegó a +2,8 °C (Loja) y +6,8 °C (El Corazón) y la correlación mensual a 0,46 (Puyo), errores del mismo orden que los que la práctica quiere medir en los reanálisis.
+- **Galápagos:** sin estación del curso.
+- **Coordenadas de la ESPAM:** aproximadas (−0,83; −80,18; 15 m).
 
 Uso docente en las prácticas de Cambio Climático de la ESPAM MFL.

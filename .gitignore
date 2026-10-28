@@ -11,3 +11,6 @@ CC_Practica1/
 # Entorno
 .ipynb_checkpoints/
 __pycache__/
+# Estaciones del INAMHI descargadas por los cuadernos desde la rama estaciones
+datos/estaciones/inamhi/
+datos/estaciones/_cache/

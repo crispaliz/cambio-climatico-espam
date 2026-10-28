@@ -17,6 +17,28 @@ import pandas as pd
 
 CARPETA = pathlib.Path("datos") / "estaciones"
 INDICE = "indice_estaciones.csv"
+RAMA = "https://raw.githubusercontent.com/crispaliz/cambio-climatico-espam/estaciones/"
+
+
+def _local(archivo: str, repo_dir) -> pathlib.Path:
+    """Ruta local de un archivo del catálogo. Las estaciones del INAMHI (inamhi/<provincia>/<código>.csv)
+    no están en la rama main: se descarga una vez el ZIP de la provincia desde la rama `estaciones`."""
+    import urllib.request
+    import zipfile
+
+    destino = pathlib.Path(repo_dir) / CARPETA / archivo
+    if destino.exists() or not archivo.startswith("inamhi/"):
+        return destino
+    _, prov, nombre = archivo.split("/")
+    zip_local = pathlib.Path(repo_dir) / CARPETA / "_cache" / f"inamhi_precip_{prov}.zip"
+    if not zip_local.exists():
+        zip_local.parent.mkdir(parents=True, exist_ok=True)
+        print(f"Descargando la lluvia del INAMHI de {prov} (una sola vez)…")
+        urllib.request.urlretrieve(RAMA + zip_local.name, zip_local)
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(zip_local) as z:
+        destino.write_bytes(z.read(nombre))
+    return destino
 
 
 def _norm(texto) -> str:
@@ -44,8 +66,10 @@ def candidatas(zona: dict, repo_dir, recuadro=None) -> pd.DataFrame:
 
     Para una provincia: las de la provincia. Para un cantón: las que caen dentro del recuadro
     descargado (`recuadro` = [N, O, S, E]); primero las que están dentro del cantón.
-    Orden: primero las que están dentro de la zona, con más meses válidos en total (Tmáx + Tmín + lluvia);
-    después las de fuera, de la más cercana a la más lejana (primero las que tienen 60 meses válidos o más).
+    Orden: primero las que están dentro de la zona; entre ellas, primero las que tienen temperatura y lluvia
+    (60 meses válidos o más de lluvia y de Tmáx o Tmín), luego las que solo tienen temperatura y al final las que solo tienen
+    lluvia, cada grupo de más a menos meses válidos.
+    Luego las de fuera, con el mismo criterio de grupos y de la más cercana a la más lejana.
     """
     import geopandas as gpd
 
@@ -64,9 +88,13 @@ def candidatas(zona: dict, repo_dir, recuadro=None) -> pd.DataFrame:
         t = t[t["dentro"]]
     t = t.assign(meses=t[["meses_tmax", "meses_tmin", "meses_precip"]].sum(axis=1))
     t = t[t["meses"] > 0]
-    dentro = t[t["dentro"]].sort_values(["meses", "dist_km"], ascending=[False, True])
+    # nivel 0: temperatura y lluvia (60 meses o más de cada una); 1: solo temperatura; 2: solo lluvia o pocos datos
+    con_t = t[["meses_tmax", "meses_tmin"]].max(axis=1) >= 60
+    con_p = t["meses_precip"] >= 60
+    t["nivel"] = (~(con_t & con_p)).astype(int) + (~con_t).astype(int)
+    dentro = t[t["dentro"]].sort_values(["nivel", "meses", "dist_km"], ascending=[True, False, True])
     fuera = t[~t["dentro"]].assign(_corta=lambda d: d["meses"] < 60)   # fuera de la zona manda la cercanía,
-    fuera = fuera.sort_values(["_corta", "dist_km"]).drop(columns="_corta")  # entre las de 60 meses o más
+    fuera = fuera.sort_values(["nivel", "_corta", "dist_km"]).drop(columns="_corta")  # entre las de 60 meses o más
     return pd.concat([dentro, fuera])
 
 
@@ -83,11 +111,13 @@ def elegir(archivo: str, zona: dict, repo_dir, recuadro=None):
     c = candidatas(zona, repo_dir, recuadro)
     if c.empty:
         return None, None
-    print("Estaciones del curso para esta zona (se usa la primera; para elegir otra, escriba su archivo en ARCHIVO_ESTACION):")
-    for _, r in c.iterrows():
+    print(f"Estaciones del curso para esta zona: {len(c)} (se usa la primera; para elegir otra, escriba su archivo en ARCHIVO_ESTACION):")
+    for _, r in c.head(10).iterrows():
         print(f"  {r['archivo']:55s} {r['estacion']} · Tmáx {r['meses_tmax']} · Tmín {r['meses_tmin']} · lluvia {r['meses_precip']} meses · {r['dist_km']:.0f} km del centro")
+    if len(c) > 10:
+        print(f"  … y {len(c) - 10} más (lista completa: datos/estaciones/indice_estaciones.csv)")
     f = c.iloc[0]
-    return pathlib.Path(repo_dir) / CARPETA / f["archivo"], f
+    return _local(f["archivo"], repo_dir), f
 
 
 def resolver(archivo: str, repo_dir, provincia: str | None = None):
@@ -106,13 +136,13 @@ def resolver(archivo: str, repo_dir, provincia: str | None = None):
     fila = t[(t["archivo"] == nombre) | (t["archivo"].map(lambda a: pathlib.Path(a).name) == pathlib.Path(nombre).name)]
     if archivo and len(fila):
         f = fila.iloc[0]
-        return pathlib.Path(repo_dir) / CARPETA / f["archivo"], f
+        return _local(f["archivo"], repo_dir), f
     lineas = [f"No se encontró el archivo de estación «{archivo}».", ""]
     if provincia:
         p = de_provincia(provincia, repo_dir)
         if len(p):
             lineas.append(f"Estaciones del curso en {provincia} (escriba el nombre de la columna «archivo» en ARCHIVO_ESTACION):")
-            for _, r in p.iterrows():
+            for _, r in p.head(15).iterrows():
                 lineas.append(f"  {r['archivo']:55s} {r['estacion']} · Tmáx {r['meses_tmax']} meses · lluvia {r['meses_precip']} meses")
         else:
             lineas.append(f"El curso no tiene estaciones en {provincia}: use la estación que le indique el docente.")
