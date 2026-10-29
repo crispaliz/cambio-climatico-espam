@@ -67,8 +67,8 @@ def candidatas(zona: dict, repo_dir, recuadro=None) -> pd.DataFrame:
     Para una provincia: las de la provincia. Para un cantón: las que caen dentro del recuadro
     descargado (`recuadro` = [N, O, S, E]); primero las que están dentro del cantón.
     Orden: primero las que están dentro de la zona; entre ellas, primero las que tienen temperatura y lluvia
-    (60 meses válidos o más de lluvia y de Tmáx o Tmín), luego las que solo tienen temperatura y al final las que solo tienen
-    lluvia, cada grupo de más a menos meses válidos.
+    (60 meses válidos o más de lluvia y de Tmáx, Tmín o Tmed), luego las que solo tienen temperatura y al final las que
+    solo tienen lluvia, cada grupo de más a menos meses válidos. Las de coordenadas por revisar van al final.
     Luego las de fuera, con el mismo criterio de grupos y de la más cercana a la más lejana.
     """
     import geopandas as gpd
@@ -86,12 +86,17 @@ def candidatas(zona: dict, repo_dir, recuadro=None) -> pd.DataFrame:
         t = t[t["lat"].between(s, n) & t["lon"].between(o, e)]
     else:
         t = t[t["dentro"]]
-    t = t.assign(meses=t[["meses_tmax", "meses_tmin", "meses_precip"]].sum(axis=1))
+    for col in ("meses_tmed", "coordenadas_revisar"):
+        if col not in t:
+            t[col] = 0 if col == "meses_tmed" else False
+    mt = t[["meses_tmax", "meses_tmin", "meses_tmed"]].max(axis=1)
+    t = t.assign(meses=mt * 2 + t["meses_precip"])
     t = t[t["meses"] > 0]
-    # nivel 0: temperatura y lluvia (60 meses o más de cada una); 1: solo temperatura; 2: solo lluvia o pocos datos
-    con_t = t[["meses_tmax", "meses_tmin"]].max(axis=1) >= 60
+    # nivel 0: temperatura y lluvia (60 meses o más de cada una); 1: solo temperatura; 2: solo lluvia o pocos datos;
+    # +3 si las coordenadas están por revisar (se usan solo si no hay otra)
+    con_t = mt >= 60
     con_p = t["meses_precip"] >= 60
-    t["nivel"] = (~(con_t & con_p)).astype(int) + (~con_t).astype(int)
+    t["nivel"] = (~(con_t & con_p)).astype(int) + (~con_t).astype(int) + 3 * t["coordenadas_revisar"].fillna(False).astype(bool)
     dentro = t[t["dentro"]].sort_values(["nivel", "meses", "dist_km"], ascending=[True, False, True])
     fuera = t[~t["dentro"]].assign(_corta=lambda d: d["meses"] < 60)   # fuera de la zona manda la cercanía,
     fuera = fuera.sort_values(["nivel", "_corta", "dist_km"]).drop(columns="_corta")  # entre las de 60 meses o más
@@ -113,7 +118,9 @@ def elegir(archivo: str, zona: dict, repo_dir, recuadro=None):
         return None, None
     print(f"Estaciones del curso para esta zona: {len(c)} (se usa la primera; para elegir otra, escriba su archivo en ARCHIVO_ESTACION):")
     for _, r in c.head(10).iterrows():
-        print(f"  {r['archivo']:55s} {r['estacion']} · Tmáx {r['meses_tmax']} · Tmín {r['meses_tmin']} · lluvia {r['meses_precip']} meses · {r['dist_km']:.0f} km del centro")
+        tm = f" · Tmed {int(r['meses_tmed'])}" if r.get("meses_tmed", 0) else ""
+        aviso = " · coordenadas por revisar" if bool(r.get("coordenadas_revisar", False)) else ""
+        print(f"  {r['archivo']:55s} {r['estacion']} · Tmáx {r['meses_tmax']} · Tmín {r['meses_tmin']}{tm} · lluvia {r['meses_precip']} meses · {r['dist_km']:.0f} km del centro{aviso}")
     if len(c) > 10:
         print(f"  … y {len(c) - 10} más (lista completa: datos/estaciones/indice_estaciones.csv)")
     f = c.iloc[0]
