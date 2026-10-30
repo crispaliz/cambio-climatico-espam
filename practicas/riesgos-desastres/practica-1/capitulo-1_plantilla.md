@@ -1,15 +1,15 @@
 # Capítulo 1 — Amenazas climáticas observadas en el territorio
 
-**Cambio Climático · Ingeniería en Riesgos de Desastres · ESPAM MFL** · Plantilla CC-IRD-C1 · Versión 1.1 · octubre de 2026
+**Cambio Climático · Ingeniería en Riesgos de Desastres · ESPAM MFL** · Plantilla CC-IRD-C1 · Versión 1.2 · octubre de 2026
 
 Evidencia el **RA A** de la Unidad I: aplicar los fundamentos teóricos del sistema climático para interpretar las causas y evidencias del cambio climático, en el contexto de la gestión de riesgos de desastres. Es el primer capítulo del proyecto de cada equipo, que se defiende en la Unidad IV, y la base del capítulo 2 (riesgo). Se escribe para un lector externo: la unidad de gestión de riesgos del GAD.
 
 ## Dos entregas, un mismo documento
 
-| | Borrador (formativa, 2 pts) | Capítulo definitivo (sumativa, 8 pts, estudio de casos) |
+| | Borrador (formativa, 2 pts) · [guía y rúbrica](guia_formativa.md) | Capítulo definitivo (sumativa, 8 pts, estudio de casos) · [guía y rúbrica](guia_sumativa.md) |
 |---|---|---|
 | Cuándo | Al cerrar `RD1_02` (extremos y registro de eventos) | Sesión de la sumativa de la Unidad I |
-| Qué se entrega | Secciones 1 a 5 con figuras, tablas, el registro de eventos que arma `RD1_02` comentado y respuestas en borrador | El capítulo completo, corregido con la retroalimentación, más la sección 6 y el anexo de la bitácora |
+| Qué se entrega | Secciones 1 a 5 con figuras, tablas, el registro de eventos que arma `RD1_02` comentado y respuestas en borrador | El capítulo completo, corregido con la retroalimentación, más la sección 6, los anexos A y C y la exposición oral |
 | Qué se revisa | Que los resultados estén completos, bien leídos, con unidades y escala, y que el contraste de eventos y lluvia se lea por fuente (DesInventar y ECU 911) | Que la interpretación sea correcta: causas, evidencias, variabilidad natural y amenaza principal, con lenguaje calibrado |
 | Extensión orientativa | 5–7 páginas | 10–14 páginas más anexos |
 
@@ -29,6 +29,7 @@ Todos los archivos están en `Mi unidad/CC_Riesgos/practica-1/<zona>/`, salvo la
 | **6. Discusión y conclusiones** *(solo definitivo)* | Amenaza hidrometeorológica principal, en qué meses y fases de ENSO; qué parte de lo observado es cambio climático y qué parte variabilidad natural, con su causa física; comparación con la evidencia del AR6; limitaciones y vacíos del registro | Clases de extremos y de detección y atribución; AR6 GTI, Resumen para responsables de políticas y capítulo 11 | `RD1_02`, pregunta 7, y síntesis |
 | **Anexo A. Bitácora de El Niño 2026–2027** | Registro semanal del evento en curso: índices, comunicados, SitRep, incidentes de la zona | [`practicas/comun/bitacora`](../../comun/bitacora/) | `RD1_01`, pregunta 6 |
 | **Anexo B. Reproducibilidad** | Enlace a las copias de los cuadernos en Drive, lista de archivos producidos (incluido `RD1_02_registro_eventos_*.csv`) y, si el equipo complementó el registro, su CSV con la fuente de cada fila | Drive del equipo | — |
+| **Anexo C. Atención a observaciones** *(solo definitivo)* | Matriz con cada observación del borrador, el cambio hecho y dónde | Retroalimentación del borrador | — |
 
 ## Fuentes del registro de eventos
 

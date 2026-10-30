@@ -15,7 +15,7 @@ Los datos se obtienen con los cuadernos comunes a las dos carreras ([`practicas/
 
 Los productos quedan en `Mi unidad/CC_Riesgos/practica-1/<zona>/`; las series se leen de `CC_datos/<zona>/`. Los dos integrantes del equipo ejecutan los cuadernos, cada uno en su Drive.
 
-Con los productos de los dos cuadernos se arma el capítulo 1 con la [plantilla](capitulo-1_plantilla.md): el borrador es la evaluación formativa y el capítulo corregido, la sumativa (estudio de casos). El evento El Niño en curso va en la [bitácora](../../comun/bitacora/), como anexo.
+Con los productos de los dos cuadernos se arma el capítulo 1 con la [plantilla](capitulo-1_plantilla.md): el borrador es la evaluación formativa (2 puntos, [guía y rúbrica](guia_formativa.md)) y el capítulo corregido con su exposición oral, la sumativa (8 puntos, estudio de casos, [guía y rúbrica](guia_sumativa.md)). La guía formativa trae, por provincia, la estación y los eventos que deben encontrar los cuadernos. El evento El Niño en curso va en la [bitácora](../../comun/bitacora/), como anexo.
 
 ## Índices de ENSO
 
