@@ -55,24 +55,55 @@ def _traer(archivo: str, destino: pathlib.Path, etiqueta: str | None = None) -> 
         return False
 
 
+def _abre(ruta: pathlib.Path) -> bool:
+    """True si el NetCDF se puede abrir (descarta archivos cortados por una desconexión de Colab)."""
+    import xarray as xr
+    try:
+        with xr.open_dataset(ruta) as ds:
+            return len(ds.data_vars) > 0
+    except Exception:
+        return False
+
+
 def obtener(fuente: str, frecuencia: str, zona: dict, area, anios, carpeta_datos,
             etiqueta: str | None = None) -> pathlib.Path | None:
     """Trae el archivo de la provincia, lo recorta al recuadro de la zona y a los años, y lo guarda.
 
     `zona` es el diccionario de `limites.zona`. Devuelve la ruta del recorte o None si no existe.
+    El archivo provincial se descarga y se recorta en el disco local de Colab, y solo el recorte terminado
+    se copia a Drive: escribir NetCDF directamente en Drive puede fallar o dejar archivos cortados.
+    Si en Drive quedó un archivo dañado de una ejecución anterior, se borra y se vuelve a traer.
     """
+    import tempfile
+
     import xarray as xr
 
     from herramientas.limites import slug
 
     carpeta_datos = pathlib.Path(carpeta_datos)
+    carpeta_datos.mkdir(parents=True, exist_ok=True)
     salida = carpeta_datos / nombre(fuente, frecuencia, zona["slug"])
     if salida.exists():
-        return salida
+        if _abre(salida):
+            return salida
+        print(f"{salida.name} estaba dañado (ejecución interrumpida): se vuelve a traer.")
+        salida.unlink()
     archivo = nombre(fuente, frecuencia, slug(zona["provincia"]))
-    tmp = carpeta_datos / f"_tmp_{archivo}"
-    if not tmp.exists() and not _traer(archivo, tmp, etiqueta):
-        return None
+    viejo = carpeta_datos / f"_tmp_{archivo}"          # de versiones anteriores, que descargaban en Drive
+    viejo.unlink(missing_ok=True)
+    local = pathlib.Path(tempfile.gettempdir()) / "cc_release"
+    local.mkdir(parents=True, exist_ok=True)
+    tmp = local / archivo
+    for intento in (1, 2):
+        if tmp.exists() and not _abre(tmp):
+            tmp.unlink()
+        if not tmp.exists() and not _traer(archivo, tmp, etiqueta):
+            return None
+        if _abre(tmp):
+            break
+        tmp.unlink(missing_ok=True)
+        if intento == 2:
+            raise RuntimeError(f"El archivo {archivo} del release llegó dañado dos veces. Revise su conexión y vuelva a ejecutar la celda.")
     n, o, s, e = area
     with xr.open_dataset(tmp) as ds:
         ds = ds.sortby("lat").sortby("lon")
@@ -81,8 +112,12 @@ def obtener(fuente: str, frecuencia: str, zona: dict, area, anios, carpeta_datos
             sub = sub.sel(time=slice(f"{min(anios)}-01-01", f"{max(anios)}-12-31"))
         sub = sub.load()
     sub.attrs["origen"] = f"release {etiqueta or ETIQUETA} de {REPO}: {archivo}, recortado a {zona['nombre']}"
-    sub.to_netcdf(salida, encoding={v: {"zlib": True, "complevel": 4} for v in sub.data_vars})
-    tmp.unlink()
+    recorte = local / f"recorte_{salida.name}"
+    sub.to_netcdf(recorte, encoding={v: {"zlib": True, "complevel": 4} for v in sub.data_vars})
+    shutil.copy(recorte, salida.with_suffix(".nc.parcial"))
+    salida.with_suffix(".nc.parcial").rename(salida)
+    recorte.unlink()
+    tmp.unlink(missing_ok=True)
     return salida
 
 
