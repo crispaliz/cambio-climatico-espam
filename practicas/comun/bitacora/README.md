@@ -6,17 +6,19 @@ Una fila por consulta, al menos una vez por semana. Todo lo que se registra aqu�
 
 ## Cómo se llena
 
-**Los cuadernos crean y alimentan la bitácora solos.** Cada vez que ejecuta `IA1_03` (Ambiental, sección 8) o `RD1_01` (Riesgos, sección 5), se agrega una fila a su archivo en Drive:
+Con el cuaderno común **`CB01_bitacora_el_nino`** [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/comun/bitacora/CB01_bitacora_el_nino.ipynb), **una vez por semana** como mínimo. No necesita los reanálisis ni otros cuadernos y tarda menos de un minuto. Cada ejecución agrega una fila a su archivo en Drive:
 
 | Carrera | Archivo |
 |---|---|
 | Ingeniería Ambiental | `Mi unidad/CC_Ambiental/bitacora/bitacora_el_nino_<zona>.xlsx` |
 | Ingeniería en Riesgos de Desastres | `Mi unidad/CC_Riesgos/bitacora/bitacora_el_nino_<zona>.xlsx` |
 
-- La fila trae ya `fecha_consulta`, `mes_indice`, `icen`, `icen_categoria`, `oni`, `fuente` y `url`.
+- El cuaderno llena `fecha_consulta`, `mes_indice`, `icen`, `icen_categoria`, `oni`, `fuente` y `url`, y deja un gráfico de los índices desde 2023 (`indices_enso_<zona>.png`) en la misma carpeta.
+- Con `USAR_ECU911` marcado, prellena `incidentes_zona` con los incidentes climáticos del ECU 911 de su provincia o cantón desde la consulta anterior. El portal de Datos Abiertos publica con uno o dos meses de retraso: si no hay nada reciente, complete con el SitRep, el GAD o la prensa.
 - Si ya hay una fila con la fecha de hoy, solo se actualizan los índices. Lo que usted escribió nunca se borra.
-- Usted completa `comunicado`, `alerta_sngr`, `incidentes_zona` y `observacion_propia`: abra el archivo desde Drive (se edita en Hojas de cálculo de Google sin convertirlo) o en Excel, escriba y cierre.
-- Ejecute la celda al menos una vez por semana. En Riesgos, el equipo entrega una sola bitácora.
+- Usted completa `comunicado`, `alerta_sngr`, `observacion_propia` y revisa `incidentes_zona`: abra el archivo desde Drive (se edita en Hojas de cálculo de Google sin convertirlo) o en Excel.
+- `IA1_03` (Ambiental) y `RD1_01` (Riesgos) también agregan la fila del día cuando se ejecutan, en el mismo archivo.
+- En Riesgos, el equipo entrega una sola bitácora.
 - El ICEN que calcula el curso usa Niño 1+2 de NOAA; contrástelo con el valor oficial del IGP.
 
 El archivo [`bitacora_el_nino.csv`](bitacora_el_nino.csv) de esta carpeta es solo la **plantilla vacía** (encabezados) para llevar la bitácora en papel u otra hoja cuando no haya energía; luego se pasan las filas al .xlsx.

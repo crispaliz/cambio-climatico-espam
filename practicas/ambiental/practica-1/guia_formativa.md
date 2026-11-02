@@ -47,7 +47,7 @@ Los cuadernos **no están en su Drive**: se abren desde el repositorio del curso
 | Portada | Asignatura, título del capítulo, provincia (y cantón si lo eligió), nombre completo y fecha. |
 | Contenido | Secciones 1 a 5 de la plantilla con sus figuras y tablas; respuestas a las preguntas de los cuadernos integradas en el texto de cada sección (no como cuestionario aparte); anexo B. |
 | Extensión | 4 a 6 páginas sin portada ni anexos; letra de 11 puntos, interlineado 1,15. |
-| No se entrega aún | Sección 6 (discusión y conclusiones) y anexo A (bitácora de El Niño). Conviene empezar la bitácora desde ya: se califica en la sumativa. |
+| No se entrega aún | Sección 6 (discusión y conclusiones) y anexo A (bitácora de El Niño). Conviene empezar la bitácora desde ya con el cuaderno común `CB01_bitacora_el_nino`: se califica en la sumativa. |
 | Uso de IA | Permitido como apoyo si se declara (herramienta y para qué se usó) al final del documento; los números y su lectura deben ser suyos y verificables en sus archivos. |
 
 ## 4. Antes de escribir: verifique su corrida

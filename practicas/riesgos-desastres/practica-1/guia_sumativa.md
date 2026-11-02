@@ -25,7 +25,7 @@ El borrador comprobó que los resultados estuvieran bien obtenidos y leídos ([g
 **Contenido adicional al borrador**
 
 - **Sección 6, discusión y conclusiones:** amenaza hidrometeorológica principal (qué, en qué meses, en qué fase de ENSO y en qué lugares); qué parte de lo observado es cambio climático y qué parte variabilidad natural, con su causa física (balance de energía, forzamiento radiativo, teleconexión de ENSO); comparación con el AR6 (Resumen para responsables de políticas y capítulo 11); limitaciones de los datos y vacíos del registro.
-- **Anexo A, bitácora de El Niño 2026–2027:** al menos una entrada semanal desde octubre, marcada como preliminar.
+- **Anexo A, bitácora de El Niño 2026–2027:** al menos una entrada semanal desde octubre, marcada como preliminar. Se lleva con el cuaderno común [`CB01_bitacora_el_nino`](../../comun/bitacora/), que llena los índices y los incidentes del ECU 911.
 - **Anexo C, matriz de atención a observaciones** (sección 3 de esta guía).
 
 ## 3. Atención a las observaciones del borrador

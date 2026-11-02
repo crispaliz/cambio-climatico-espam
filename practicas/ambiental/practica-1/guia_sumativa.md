@@ -149,7 +149,7 @@ Es la sección que más pesa en la interpretación. Se organiza en cuatro aparta
 
 | Anexo | Qué debe contener |
 |---|---|
-| **A. Bitácora de El Niño 2026–2027** | Al menos una entrada semanal desde octubre: fecha, ICEN y ONI vigentes, comunicado del ENFEN o de NOAA, lo observado en su zona y una línea de lectura propia. Marcada como información preliminar, separada del análisis climatológico. |
+| **A. Bitácora de El Niño 2026–2027** | Al menos una entrada semanal desde octubre: fecha, ICEN y ONI vigentes, comunicado del ENFEN o de NOAA, lo observado en su zona y una línea de lectura propia. Marcada como información preliminar, separada del análisis climatológico. Se lleva con el cuaderno común `CB01_bitacora_el_nino` (`practicas/comun/bitacora/`), que llena los índices y los incidentes del ECU 911; se entrega el archivo `bitacora_el_nino_<zona>.xlsx` resumido en una tabla. |
 | **B. Reproducibilidad** | Enlaces a sus copias de los cuadernos en Drive, lista de archivos producidos y declaración de uso de IA. |
 | **C. Atención a observaciones** | Matriz con cada observación del borrador (O1, O2, …): qué se cambió y dónde (sección y página). Ver el apartado 4. |
 

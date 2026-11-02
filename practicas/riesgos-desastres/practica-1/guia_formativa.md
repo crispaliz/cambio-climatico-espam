@@ -23,7 +23,7 @@ El borrador no busca un texto pulido: busca comprobar que el equipo **corrió bi
 - **Anexo B (reproducibilidad):** enlace a las copias de los cuadernos en el Drive de cada integrante y lista de los archivos producidos. Si el equipo complementó el registro de eventos con su CSV (`ARCHIVO_EVENTOS`), se adjunta con la fuente de cada fila.
 - Extensión orientativa: 5 a 7 páginas sin anexos.
 
-No se entregan todavía la sección 6 (discusión y conclusiones) ni el anexo A (bitácora); sí conviene empezar la bitácora desde octubre.
+No se entregan todavía la sección 6 (discusión y conclusiones) ni el anexo A (bitácora); sí conviene empezar la bitácora desde octubre con el cuaderno común [`CB01_bitacora_el_nino`](../../comun/bitacora/).
 
 ## 3. Antes de escribir: verifique su corrida
 
