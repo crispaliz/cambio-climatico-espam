@@ -97,6 +97,44 @@ def _pedir(conjunto: str, solicitud: dict, destino: pathlib.Path, intentos: int 
             time.sleep(espera)
 
 
+def guardar_nc(ds, destino, encoding=None) -> pathlib.Path:
+    """Escribe un NetCDF en el disco local de Colab y lo mueve a `destino` (Drive) ya terminado.
+
+    Escribir HDF5 directamente en Drive falla a veces («NetCDF: HDF error», «Permission denied»), sobre todo
+    si el archivo ya existe y quedó abierto por una ejecución anterior de la misma sesión. Así, una
+    desconexión nunca deja un archivo cortado en Drive y el reemplazo no choca con el archivo abierto.
+    """
+    import os
+    import shutil
+    import tempfile
+
+    destino = pathlib.Path(destino)
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    fd, local = tempfile.mkstemp(suffix=".nc")
+    os.close(fd)
+    try:
+        ds.to_netcdf(local, encoding=encoding)
+        parcial = destino.with_name(destino.name + ".parcial")
+        shutil.copyfile(local, parcial)
+        os.replace(parcial, destino)
+    finally:
+        pathlib.Path(local).unlink(missing_ok=True)
+    return destino
+
+
+def abre_bien(ruta) -> bool:
+    """True si el NetCDF existe y se puede abrir (descarta archivos cortados)."""
+    import xarray as xr
+    ruta = pathlib.Path(ruta)
+    if not ruta.exists() or ruta.stat().st_size == 0:
+        return False
+    try:
+        with xr.open_dataset(ruta) as ds:
+            return len(ds.data_vars) > 0
+    except Exception:
+        return False
+
+
 def abrir_ds(ruta):
     """Abre una descarga del CDS (NetCDF o zip con varios) con nombres time, lat, lon."""
     import xarray as xr
@@ -192,11 +230,17 @@ def descargar_zona(geom, anios, carpeta_datos, slug: str, inicio_dia: int = 0, b
     t0 = time.time()
     for i, r in cs.iterrows():
         diario = tmp / f"d_{r.lat:+.2f}_{r.lon:+.2f}_{sufijo}.nc"
+        if diario.exists() and not abre_bien(diario):
+            print(f"  celda ({r.lat:+.2f}, {r.lon:+.2f}): archivo dañado de una ejecución anterior, se rehace")
+            diario.unlink()
         if not diario.exists():
+            h = tmp / f"h_{r.lat:+.2f}_{r.lon:+.2f}_{min(anios)}_{max(anios)}.nc"
+            if h.exists() and not abre_bien(h) and not zipfile.is_zipfile(h):
+                h.unlink()
             h = descargar_celda(r.lat, r.lon, anios, tmp)
             d = horario_a_diario(abrir_ds(h), inicio_dia).expand_dims(lat=[r.lat], lon=[r.lon])
             d = d.sel(time=slice(f"{min(anios)}-01-01", f"{max(anios)}-12-31"))
-            d.to_netcdf(diario)
+            guardar_nc(d, diario)
             if borrar_horarios:
                 h.unlink(missing_ok=True)
         if avance:
@@ -212,10 +256,11 @@ def descargar_zona(geom, anios, carpeta_datos, slug: str, inicio_dia: int = 0, b
     enc = {v: {"zlib": True, "complevel": 4, "dtype": "float32"} for v in malla.data_vars}
     f_d = carpeta_datos / f"era5_diario_{slug}.nc"
     f_m = carpeta_datos / f"era5_mensual_{slug}.nc"
-    malla.load().to_netcdf(f_d, encoding=enc)
-    V.mensual_desde_diario(malla).to_netcdf(f_m, encoding=enc)
+    malla = malla.load()
     for p in partes:
         p.close()
+    guardar_nc(malla, f_d, enc)
+    guardar_nc(V.mensual_desde_diario(malla), f_m, enc)
     return {"diario": f_d, "mensual": f_m, "celdas": cs}
 
 

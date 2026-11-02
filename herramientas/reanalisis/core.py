@@ -298,6 +298,10 @@ def meses_diarios(anios, recuadro, carpeta_meses, hilos: int = 4, avance: bool =
     with ThreadPoolExecutor(hilos) as ex:
         for k, (a, m) in enumerate(meses, 1):
             f = carpeta_meses / f"d_{a}{m:02d}.nc"
+            if f.exists():
+                from herramientas.reanalisis.era5 import abre_bien
+                if not abre_bien(f):
+                    f.unlink()        # mes cortado por una desconexión: se rehace
             if not f.exists():
                 ds = _mes(a, m, grib, recuadro, ex)
                 ds.to_netcdf(f.with_suffix(".parcial"),
@@ -340,8 +344,9 @@ def diario_zona(area, anios, carpeta_datos, slug: str, hilos: int = 4, avance: b
                 "processing": "herramientas/reanalisis/core.py: diario_zona"}
     enc = {v: {"zlib": True, "complevel": 4, "dtype": "float32"} for v in ds.data_vars}
     f_d, f_m = carpeta_datos / f"core_diario_{slug}.nc", carpeta_datos / f"core_mensual_{slug}.nc"
-    ds.to_netcdf(f_d, encoding=enc)
-    mensual_desde_diario(ds).to_netcdf(f_m, encoding=enc)
+    from herramientas.reanalisis.era5 import guardar_nc
+    guardar_nc(ds, f_d, enc)
+    guardar_nc(mensual_desde_diario(ds), f_m, enc)
     return {"diario": f_d, "mensual": f_m}
 
 
@@ -428,5 +433,6 @@ def mensual_zona(area, anios, carpeta_datos, slug: str, hilos: int = 3, avance: 
     ds.attrs = {"title": f"CORe mensual, {slug}", "source": "NOAA/NCEP CPC, CORe, CDAS look-alike mensual (GRIB1, T62)",
                 "url": BASE_MES, "processing": "herramientas/reanalisis/core.py: mensual_zona"}
     f = carpeta_datos / f"core_mensual_{slug}.nc"
-    ds.load().to_netcdf(f, encoding={v: {"zlib": True, "complevel": 4, "dtype": "float32"} for v in ds.data_vars})
+    from herramientas.reanalisis.era5 import guardar_nc
+    guardar_nc(ds.load(), f, {v: {"zlib": True, "complevel": 4, "dtype": "float32"} for v in ds.data_vars})
     return f
