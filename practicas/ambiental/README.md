@@ -9,3 +9,4 @@ Los datos se obtienen con los [cuadernos comunes](../comun/) (los mismos que usa
 | Práctica | Capítulo del proyecto | Carpeta |
 |---|---|---|
 | 1. Diagnóstico del clima observado | 1 | [practica-1](practica-1/) |
+| 2. Emisiones, riesgo y estrategias | 2 | [practica-2](practica-2/) |
