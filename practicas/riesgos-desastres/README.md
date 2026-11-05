@@ -7,3 +7,4 @@ Los datos se obtienen con los [cuadernos comunes](../comun/) (los mismos que usa
 | Práctica | Capítulo del proyecto | Carpeta |
 |---|---|---|
 | 1. Clima, ENSO y extremos del territorio | 1 | [practica-1](practica-1/) |
+| 2. Riesgo climático del territorio y sus medidas | 2 | [practica-2](practica-2/) |

@@ -85,6 +85,7 @@ Cada persona usa su propia cuenta: el CDS limita las solicitudes por cuenta y un
 | Común | Bitácora de El Niño 2026–2027 | [comun/bitacora](practicas/comun/bitacora/): plantilla de registro semanal |
 | Ambiental | 1. Diagnóstico del clima observado | [ambiental/practica-1](practicas/ambiental/practica-1/): IA1_01 climatología → IA1_02 estación–reanálisis → IA1_03 tendencias y ENSO · [plantilla del capítulo 1](practicas/ambiental/practica-1/capitulo-1_plantilla.md) |
 | Riesgos de Desastres | 1. Clima, ENSO y extremos del territorio | [riesgos-desastres/practica-1](practicas/riesgos-desastres/practica-1/): RD1_01 ciclo anual y ENSO → RD1_02 extremos y registro de eventos · [plantilla del capítulo 1](practicas/riesgos-desastres/practica-1/capitulo-1_plantilla.md) |
+| Riesgos de Desastres | 2. Riesgo climático y medidas | [riesgos-desastres/practica-2](practicas/riesgos-desastres/practica-2/): RD2_01 exposición por cantón → RD2_02 vulnerabilidad → RD2_03 matriz de medidas |
 
 ## Preparación de datos (docente)
 
