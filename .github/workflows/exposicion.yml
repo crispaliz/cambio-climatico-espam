@@ -1,0 +1,44 @@
+# Tabla nacional de elementos expuestos por cantón (Práctica 2 de Riesgos de Desastres).
+# © 2026 Cristian Omar Paliz Acosta · ESPAM MFL
+#
+# Descarga WorldPop 2020, Copernicus DEM GLO-90 y el extracto de OpenStreetMap de Ecuador, calcula la
+# población y la infraestructura de cada cantón (total, en zona baja y en ladera) y guarda en el repositorio
+# datos/exposicion/exposicion_cantones.csv y metadatos.json. Se ejecuta al cambiar datos/exposicion/solicitud.json
+# o a mano (Actions › Exposición por cantón › Run workflow). Tarda unos 15–30 minutos.
+
+name: Exposición por cantón
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["datos/exposicion/solicitud.json"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: exposicion
+  cancel-in-progress: false
+
+jobs:
+  tabla:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: {python-version: "3.12"}
+      - run: sudo apt-get update -q && sudo apt-get install -y -q osmium-tool
+      - run: pip install -q geopandas rasterio pyogrio shapely requests pandas numpy
+      - run: python -m herramientas.exposicion.preparar --salida datos/exposicion
+        env: {PYTHONUNBUFFERED: "1"}
+      - name: Guardar la tabla en el repositorio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add datos/exposicion/exposicion_cantones.csv datos/exposicion/metadatos.json
+          if git diff --cached --quiet; then echo "Sin cambios"; exit 0; fi
+          git commit -m "Datos: tabla de exposición por cantón (WorldPop, Copernicus DEM, OpenStreetMap)"
+          git pull --rebase -q origin main
+          git push origin HEAD:main

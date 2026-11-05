@@ -1,0 +1,4 @@
+{
+  "version": 1,
+  "nota": "Al cambiar y subir este archivo, GitHub Actions recalcula la tabla de exposición por cantón (.github/workflows/exposicion.yml)."
+}
