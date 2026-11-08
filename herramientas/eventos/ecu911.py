@@ -58,6 +58,10 @@ TIPOS = [
     (r"amenazas? natural", "amenaza natural sin detalle"),
     (r"^gestion de riesgos$", "gestión de riesgos sin detalle"),
 ]
+# Códigos DPA del ECU 911 que no coinciden con los límites del curso (CONALI): La Concordia figura en el
+# ECU 911 como 2302 (Santo Domingo de los Tsáchilas) y en los límites como 0808 (Esmeraldas).
+RECODIFICAR = {"2302": "0808"}
+
 # «Amenazas naturales» es un subtipo genérico del ECU 911 que puede incluir sismos u otros eventos no
 # climáticos: se conserva porque en la época lluviosa suele ser la mayoría, pero hay que verificarlo.
 # En algunos meses (todo febrero de 2023) el subtipo solo repite «Gestión de Riesgos»: se conserva como
@@ -84,9 +88,9 @@ def _abrir(url: str, timeout: int = 300) -> bytes:
         return r.read()
 
 
-def recursos() -> pd.DataFrame:
+def recursos(timeout: int = 30) -> pd.DataFrame:
     """Archivos mensuales publicados: mes (AAAAMM) y URL, según la API del portal."""
-    datos = json.loads(_abrir(API, 60).decode("utf-8"))
+    datos = json.loads(_abrir(API, timeout).decode("utf-8"))
     filas = []
     for r in datos["result"]["resources"]:
         m = re.search(r"(20\d{2})(0[1-9]|1[0-2])", r.get("name", ""))
@@ -124,20 +128,36 @@ def filtrar(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def incidentes(carpeta=None, desde: str = "2021-07", hasta: str | None = None, nacional=None,
-               verbose: bool = True) -> pd.DataFrame:
+               verbose: bool = True, completar: bool = True) -> pd.DataFrame:
     """Incidentes climáticos de gestión de riesgos de todo el país, de `desde` a `hasta` (AAAA-MM).
 
     Orden de búsqueda:
       1. `nacional`: un CSV ya compilado (por ejemplo, el que publica el docente en el repositorio).
       2. La caché por mes en `carpeta` (cada mes se descarga una sola vez).
       3. El portal de Datos Abiertos (unos 30–40 MB por mes; solo se guardan las filas útiles).
+    Con `nacional` y `completar=True`, los meses publicados después del compilado se traen del portal;
+    si el portal no responde, se sigue con el compilado y se avisa. `out.attrs["ultimo_dia"]` dice hasta
+    dónde llegan los datos.
     """
     d0 = pd.Period(desde, "M")
     d1 = pd.Period(hasta, "M") if hasta else pd.Period(pd.Timestamp.today(), "M")
     if nacional and pathlib.Path(nacional).exists():
-        df = pd.read_csv(nacional, dtype=str, parse_dates=["fecha"])
-        if verbose: print(f"ECU 911: compilado {pathlib.Path(nacional).name}, {df['fecha'].min():%Y-%m} a {df['fecha'].max():%Y-%m}")
-        return df[(df["fecha"].dt.to_period("M") >= d0) & (df["fecha"].dt.to_period("M") <= d1)]
+        df = pd.read_csv(nacional, dtype=str)
+        df["fecha"] = pd.to_datetime(df["fecha"], errors="coerce")
+        fin = df["fecha"].max().to_period("M")
+        if verbose: print(f"ECU 911: compilado del curso {pathlib.Path(nacional).name}, {df['fecha'].min():%Y-%m} a {fin}")
+        if completar and fin < d1:
+            try:
+                extra = incidentes(carpeta, desde=str(fin + 1), hasta=hasta, verbose=verbose)
+                if len(extra):
+                    df = pd.concat([df, extra], ignore_index=True)
+                elif verbose:
+                    print(f"  El portal aún no publica meses posteriores a {fin} (publica con 1–2 meses de retraso).")
+            except Exception as err:
+                if verbose: print(f"  No se pudo consultar el portal para meses posteriores a {fin} ({type(err).__name__}); se sigue con el compilado.")
+        df = df[(df["fecha"].dt.to_period("M") >= d0) & (df["fecha"].dt.to_period("M") <= d1)].sort_values("fecha").reset_index(drop=True)
+        df.attrs["ultimo_dia"] = df["fecha"].max()
+        return df
     carpeta = pathlib.Path(carpeta) if carpeta else None
     if carpeta: carpeta.mkdir(parents=True, exist_ok=True)
     rec = recursos()
@@ -160,13 +180,23 @@ def incidentes(carpeta=None, desde: str = "2021-07", hasta: str | None = None, n
         return pd.DataFrame(columns=COLUMNAS + ["tipo"])
     out = pd.concat(partes, ignore_index=True)
     out["fecha"] = pd.to_datetime(out["fecha"])
+    out = out.sort_values("fecha").reset_index(drop=True)
     out.attrs["meses_fallidos"] = fallidos
-    return out.sort_values("fecha").reset_index(drop=True)
+    out.attrs["ultimo_dia"] = out["fecha"].max()
+    return out
 
 
 def de_zona(inc: pd.DataFrame, codigo_dpa: str) -> pd.DataFrame:
-    """Incidentes de una provincia (código DPA de 2 dígitos) o de un cantón (4 dígitos)."""
-    return inc[inc["cod_parroquia"].astype(str).str.zfill(6).str.startswith(str(codigo_dpa))].copy()
+    """Incidentes de una provincia (código DPA de 2 dígitos) o de un cantón (4 dígitos).
+
+    Los códigos se llevan antes a la codificación de los límites del curso (ver RECODIFICAR).
+    """
+    cod = inc["cod_parroquia"].astype(str).str.zfill(6)
+    for viejo, nuevo in RECODIFICAR.items():
+        cod = cod.where(~cod.str.startswith(viejo), nuevo + cod.str[4:])
+    out = inc[cod.str.startswith(str(codigo_dpa))].copy()
+    out["cod_parroquia"] = cod[out.index]
+    return out
 
 
 def a_registro(inc: pd.DataFrame, por: str = "canton") -> pd.DataFrame:

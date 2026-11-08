@@ -79,6 +79,8 @@ def eventos_por_canton(codigo_provincia: str, desde_desinventar=True, desde_ecu9
     if desde_ecu911 and ECU911.exists():
         e = pd.read_csv(ECU911, dtype={"cod_parroquia": str})
         e["codigo"] = e["cod_parroquia"].str.zfill(6).str[:4]
+        from herramientas.eventos.ecu911 import RECODIFICAR
+        e["codigo"] = e["codigo"].replace(RECODIFICAR)   # La Concordia: 2302 en el ECU 911, 0808 en los límites
         e = e[e["codigo"].str[:2] == cp]
         for a, tipos in EVENTOS.items():
             s = e[e.tipo.isin(tipos)].drop_duplicates(["fecha", "codigo", "tipo"])
