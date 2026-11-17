@@ -6,7 +6,7 @@
 
 ## Propósito
 
-Como no habrá salida de campo, usted evalúa el sitio **a distancia** con evidencia verificable. Este trabajo resuelve el **paso 2** de la Práctica 2 (`IA2_02_ficha_riesgo`, calificación del sitio) y deja una lista inicial de opciones para el **paso 3** (`IA2_03_matriz_estrategias`).
+Usted evalúa el sitio **a distancia** con evidencia verificable. Este trabajo resuelve el **paso 2** de la Práctica 2 (`IA2_02_ficha_riesgo`, calificación del sitio) y deja una lista inicial de opciones para el **paso 3** (`IA2_03_matriz_estrategias`).
 
 Al terminar, usted podrá:
 
@@ -17,7 +17,7 @@ Al terminar, usted podrá:
 ## Lo que necesita
 
 - Su evidencia climática de la Práctica 1: el factor de El Niño en la lluvia de diciembre a mayo, el Rx1day de 25 años y la tendencia de días cálidos (`CR02`, `IA1_03`).
-- La [hoja de campo](guia_formativa.md#anexo-hoja-de-campo-para-la-ficha-de-riesgo-ia2_02) del anexo de la guía formativa, con su tabla de equivalencias para la modalidad remota.
+- La [hoja de evaluación del sitio](guia_formativa.md#anexo-hoja-de-campo-para-la-ficha-de-riesgo-ia2_02) del anexo de la guía formativa, con su tabla de evidencias a distancia.
 - Google Earth (imágenes históricas) y Google Maps (Street View con fecha).
 - El PDOT de su cantón (sitio web del GAD) y, si los encuentra, registros de eventos (SGR, ECU 911, prensa local).
 - Las diapositivas de la sesión: marco de riesgo, escalas, índice R = ∛(A·E·V) y familias de opciones.
@@ -31,7 +31,7 @@ Al terminar, usted podrá:
 ## Parte 2 · Evidencia remota y calificación (20 min)
 
 1. Reúna **al menos cuatro evidencias** del sitio o de su cantón, con fuente y fecha: dos capturas (Street View o imágenes históricas) y dos más entre eventos registrados (ECU 911, SGR), mapas de amenaza del PDOT, notas de prensa o la evidencia climática de la Práctica 1. Si puede, sume una llamada a un habitante (rol, no nombre).
-2. **Califique** la hoja de campo: amenazas (0 a 5), exposición, sensibilidad y capacidad (1 a 5).
+2. **Califique** la hoja de evaluación del sitio: amenazas (0 a 5), exposición, sensibilidad y capacidad (1 a 5).
 3. Para cada valor, escriba **la evidencia que lo sostiene** y cuán segura es (alta, media, baja). Ejemplo: «drenaje = 4; Street View de marzo de 2024 muestra alcantarillas tapadas y basura en el cauce; confianza media».
 4. Pase los valores a las celdas 5 y 6 de `IA2_02` y compare con el **índice** calculado a mano para su amenaza principal:
 
@@ -66,13 +66,13 @@ Cierre con **una frase** que relacione su mejor opción con el componente domina
 1. ¿Por qué la frase «el riesgo del sitio es la lluvia de El Niño» es incorrecta según el AR6?
 2. Si en su sitio subiera la capacidad de adaptación de 2 a 4 sin cambiar nada más, ¿cuánto bajaría su índice? Haga la cuenta.
 3. ¿Cuál de sus cuatro opciones podría trasladar el riesgo a otra comunidad, y cómo lo evitaría?
-4. ¿Qué calificación es la más incierta por no haber visitado el sitio, y cómo cambiaría el índice si estuviera un punto arriba o abajo?
+4. ¿Qué calificación es la más incierta por basarse en evidencia indirecta, y cómo cambiaría el índice si estuviera un punto arriba o abajo?
 
 ## Lista de cotejo antes de entregar
 
 - [ ] Sitio con nombre, cantón, parroquia, coordenadas y motivo de elección.
 - [ ] Cuatro o más evidencias remotas, cada una con fuente y fecha (al menos dos capturas).
-- [ ] Hoja de campo calificada, cada valor con su evidencia y confianza.
+- [ ] Hoja de evaluación calificada, cada valor con su evidencia y confianza.
 - [ ] Índice y componente dominante (a mano y en `IA2_02`).
 - [ ] Tabla de 4 opciones completa, con al menos una basada en ecosistemas y una social o institucional.
 - [ ] Respuestas a las tres preguntas.
