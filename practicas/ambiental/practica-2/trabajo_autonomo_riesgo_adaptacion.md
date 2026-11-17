@@ -24,7 +24,7 @@ Al terminar, usted podrá:
 
 ## Parte 1 · El sitio (15 min)
 
-1. Elija **un sitio** de su provincia con buena cobertura de imágenes (Street View o imágenes históricas). Puede ser un barrio junto a un río, una playa, un estuario o manglar, una llanura agrícola inundable, una ladera o una zona de secano.
+1. Elija **un sitio de la provincia de su capítulo 1**, de preferencia dentro de la zona que analizó allí, con buena cobertura de imágenes (Street View o imágenes históricas). Puede ser un barrio junto a un río, una playa, un estuario o manglar, una llanura agrícola inundable, una ladera o una zona de secano.
 2. Anote su nombre, cantón, parroquia y coordenadas en grados decimales (Google Earth), con una captura del sitio con escala.
 3. Explique en dos o tres líneas **por qué lo eligió**: ¿qué amenaza sospecha y qué hay expuesto?
 
