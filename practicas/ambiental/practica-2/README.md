@@ -12,6 +12,8 @@ Evidencia el RA B de la Unidad II y entrega el **capítulo 2** del proyecto. Tra
 
 Con los productos de los tres pasos se arma el capítulo 2 con la [plantilla](capitulo-2_plantilla.md): el borrador es la evaluación formativa (2 puntos, [guía y rúbrica](guia_formativa.md), con la hoja de campo para la ficha de riesgo en su anexo).
 
+Antes de la salida de campo: [trabajo autónomo del 17 de noviembre](trabajo_autonomo_riesgo_adaptacion.md) (sitio, evidencia previa, precalificación de la hoja de campo y cuatro opciones de adaptación preliminares).
+
 ## Datos
 
 - **Paso 1:** el cuaderno no descarga datos de actividad; cada estudiante los busca en las fuentes oficiales (tabla de la sección 3 del cuaderno) y los registra con su fuente. La población viene del Censo 2022 ([`datos/inventario`](../../../datos/inventario/)) y los factores, de [`herramientas/inventario`](../../../herramientas/inventario/).
