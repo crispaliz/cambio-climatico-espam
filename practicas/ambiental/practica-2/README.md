@@ -12,7 +12,7 @@ Evidencia el RA B de la Unidad II y entrega el **capítulo 2** del proyecto. Tra
 
 Con los productos de los tres pasos se arma el capítulo 2 con la [plantilla](capitulo-2_plantilla.md): el borrador es la evaluación formativa (2 puntos, [guía y rúbrica](guia_formativa.md), con la hoja de campo para la ficha de riesgo en su anexo).
 
-**Modalidad remota (contingencia):** no hay salida de campo; el sitio se evalúa a distancia con la tabla de equivalencias del anexo de la [guía formativa](guia_formativa.md). [Trabajo autónomo del 17 de noviembre](trabajo_autonomo_riesgo_adaptacion.md): sitio, evidencia remota, calificación de la hoja y cuatro opciones de adaptación preliminares.
+**Modalidad remota (contingencia, del 16 al 20 de noviembre):** la salida de campo del 18 de noviembre no se realiza; el sitio se evalúa a distancia con la tabla de equivalencias del anexo de la [guía formativa](guia_formativa.md). [Trabajo autónomo del 17 de noviembre](trabajo_autonomo_riesgo_adaptacion.md): sitio, evidencia remota, calificación de la hoja y cuatro opciones de adaptación preliminares. El resto de la planificación de la Unidad II se mantiene.
 
 ## Datos
 

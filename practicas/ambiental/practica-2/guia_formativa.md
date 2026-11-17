@@ -254,7 +254,7 @@ El docente devuelve el borrador con observaciones numeradas por sección (O1, O2
 
 ## Anexo. Hoja de campo para la ficha de riesgo (IA2_02)
 
-> **Modalidad remota (contingencia, noviembre de 2026).** Si no es posible visitar el sitio, la hoja se llena con **evidencia a distancia**, con el mismo rigor: una evidencia verificable por valor, con fuente y fecha.
+> **Modalidad remota (contingencia, solo del 16 al 20 de noviembre de 2026).** Como la salida de campo del 18 de noviembre cae en esa semana, la hoja se llena con **evidencia a distancia**, con el mismo rigor: una evidencia verificable por valor, con fuente y fecha.
 >
 > | En la visita | Equivalente remoto |
 > |---|---|
@@ -264,7 +264,7 @@ El docente devuelve el borrador con observaciones numeradas por sección (O1, O2
 > | Entrevistas | Llamada o mensaje a un habitante o a un técnico del GAD (rol, no nombre), con su consentimiento |
 > | Exposición (personas, viviendas, servicios) | Censo 2022 por parroquia, conteo de techos y servicios en la imagen, tabla de exposición del curso (`datos/exposicion`) |
 >
-> En la fila «Fecha y hora de la visita» escriba la fecha de la evaluación remota. En el capítulo, declare en las limitaciones que la evidencia es remota. Si vive cerca y puede ir con seguridad, sus fotos propias siguen siendo la mejor evidencia.
+> En la fila «Fecha y hora de la visita» escriba la fecha de la evaluación remota. En el capítulo, declare en las limitaciones que la evidencia es remota. Si vive cerca y puede ir con seguridad, sus fotos propias siguen siendo la mejor evidencia. Desde el 23 de noviembre las clases vuelven a ser presenciales y el resto de la planificación de la Unidad II no cambia.
 
 Imprímala o cópiela en su libreta. Llénela en el sitio y pase las calificaciones a las celdas 5 y 6 de `IA2_02`. Cada calificación lleva una evidencia (foto, medida, relato con fuente, documento).
 

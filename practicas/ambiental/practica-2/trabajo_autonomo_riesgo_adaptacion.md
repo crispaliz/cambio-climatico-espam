@@ -2,7 +2,7 @@
 
 **Cambio Climático · Ingeniería Ambiental · Unidad II · martes 17 de noviembre de 2026**
 **Duración:** 60 minutos · **Modalidad:** individual, con la misma provincia de la Práctica 1
-**Entrega:** un PDF de 1 a 2 páginas en el aula virtual · **Modalidad:** remota, por la contingencia (sin salida de campo)
+**Entrega:** un PDF de 1 a 2 páginas en el aula virtual · **Modalidad:** remota por la contingencia del 16 al 20 de noviembre (la salida de campo del 18 no se realiza); el resto de la Unidad II sigue como está planificado
 
 ## Propósito
 
