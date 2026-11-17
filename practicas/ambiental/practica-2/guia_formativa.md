@@ -134,7 +134,7 @@ Conecta el capítulo 1 con este: qué cambió en el clima de la provincia y por 
 - Figura: ficha de riesgo del sitio (`IA2_02_ficha_riesgo_*.png`).
 - Tabla: evidencia climática (`IA2_02_evidencia_climatica_*.csv`).
 - Tabla: calificaciones con su justificación (`IA2_02_calificaciones_*.csv`) y riesgo por amenaza (`IA2_02_riesgo_*.csv`).
-- Dos a cuatro fotografías propias del sitio con pie (qué muestran y fecha).
+- Dos a cuatro fotografías propias del sitio con pie (qué muestran y fecha). En la modalidad remota: capturas fechadas de Street View o de imágenes históricas de Google Earth, o fotos de terceros con autor y fuente (ver el anexo).
 
 | Insumos | Preguntas que integra | Extensión orientativa |
 |---|---|---|
@@ -225,7 +225,7 @@ Cinco criterios de **0,40 puntos** cada uno, con cinco niveles. Se asigna un sol
 |---|---|---|---|---|---|
 | **C1. Introducción y coherencia del capítulo (sección 1 y conexión entre secciones)**<br>Indicadores: resultados del capítulo 1 usados; compromisos del país; objetivo y cadena del análisis; elección del sitio; las estrategias se derivan de las secciones 2 y 3. | Usa resultados concretos del capítulo 1 para justificar el capítulo; sitúa la NDC y el PLANACC; explica la cadena inventario → riesgo → estrategias y por qué eligió el sitio; las secciones se citan entre sí. | Cumple casi todo, con la elección del sitio o el contexto incompletos. | Introducción genérica o sin vínculo con el capítulo 1. | Secciones sueltas, sin hilo. | No presenta la sección 1. |
 | **C2. Inventario de emisiones (sección 2)**<br>Indicadores: método y PCG; datos de actividad con fuente y año; total con incertidumbre; sectores, gases y categorías principales; completitud y NE; electricidad aparte; comparación nacional. | Método, PCG y año declarados; cada dato de actividad con unidad, fuente y año; total redondeado con incertidumbre; sectores, gases y categorías principales interpretados; NE explicadas y su efecto en el total; electricidad como memo; comparación nacional con sus límites. | Correcto, con una o dos omisiones (por ejemplo, sin comparación nacional o sin el efecto de las NE). | Datos de actividad sin fuente, electricidad sumada al total o categorías principales mal leídas. | Solo la figura o la tabla del cuaderno, sin lectura. | No presenta la sección. |
-| **C3. Ficha de riesgo del sitio (sección 3)**<br>Indicadores: sitio descrito y ubicado; marco AR6 y fórmula; amenazas con evidencia climática y del sitio; componentes justificados; índice e interpretación; limitaciones; fotos propias. | Sitio ubicado y descrito con fecha de visita; marco y fórmula explicados; cada amenaza con evidencia climática y del sitio, y las diferencias con la sugerencia explicadas; todos los indicadores justificados; amenaza principal y componente dominante identificados; limitaciones y fotos con pie. | Correcto, con justificaciones débiles en algunos indicadores. | Calificaciones sin justificar, confusión entre amenaza y riesgo o capacidad invertida. | Solo la figura de la ficha. | No presenta la sección. |
+| **C3. Ficha de riesgo del sitio (sección 3)**<br>Indicadores: sitio descrito y ubicado; marco AR6 y fórmula; amenazas con evidencia climática y del sitio; componentes justificados; índice e interpretación; limitaciones; fotos propias. | Sitio ubicado y descrito con fecha de visita; marco y fórmula explicados; cada amenaza con evidencia climática y del sitio, y las diferencias con la sugerencia explicadas; todos los indicadores justificados; amenaza principal y componente dominante identificados; limitaciones y fotos (o capturas, en la modalidad remota) con pie. | Correcto, con justificaciones débiles en algunos indicadores. | Calificaciones sin justificar, confusión entre amenaza y riesgo o capacidad invertida. | Solo la figura de la ficha. | No presenta la sección. |
 | **C4. Matriz de estrategias (sección 4)**<br>Indicadores: opciones vinculadas a resultados; equilibrio mitigación–adaptación; criterios, pesos y su justificación; ranking y robustez; cartera con sinergias, mala adaptación, actores y alineación. | Entre 6 y 12 opciones, cada una vinculada a una categoría principal, una amenaza o un indicador crítico; al menos 3 de mitigación y 3 de adaptación; pesos justificados; robustez leída; cartera con sinergias, alertas de mala adaptación tratadas, actores responsables y vínculo con NDC, PLANACC y PDOT. | Correcto, con una omisión (por ejemplo, sin actores o sin robustez). | Opciones desvinculadas de sus resultados, puntajes sin justificar o cartera desequilibrada. | Lista de opciones sin evaluación. | No presenta la sección, o evaluación por defecto (todos 3). |
 | **C5. Forma, fuentes y reproducibilidad**<br>Indicadores: figuras y tablas completas; respuestas integradas; unidades y redondeo; APA 7; anexo B; coincidencia con el Drive; extensión. | Figuras y tablas numeradas con título, fuente y unidad, citadas antes de aparecer; respuestas integradas; APA 7 correcto; anexo B completo con la hoja de campo; números coinciden con el Drive; extensión dentro de lo pedido. | Uno o dos elementos de forma ausentes. | Varias figuras sin unidad o fuente, o anexo B incompleto. | Documento desordenado; no se puede rastrear el origen de los números. | Sin anexo B y sin formato mínimo. |
 
@@ -253,6 +253,18 @@ Estudiante: ______________________________   Provincia: ____________________   S
 El docente devuelve el borrador con observaciones numeradas por sección (O1, O2, …). Usted responde cada una en el **anexo C** del capítulo definitivo (matriz de atención a observaciones), que se presenta en la sumativa de la Unidad II.
 
 ## Anexo. Hoja de campo para la ficha de riesgo (IA2_02)
+
+> **Modalidad remota (contingencia, noviembre de 2026).** Si no es posible visitar el sitio, la hoja se llena con **evidencia a distancia**, con el mismo rigor: una evidencia verificable por valor, con fuente y fecha.
+>
+> | En la visita | Equivalente remoto |
+> |---|---|
+> | Ubicación y GPS | Google Earth o Google Maps: coordenadas en grados decimales y captura del sitio con escala |
+> | Fotografías propias | Capturas fechadas de Street View y de imágenes históricas de Google Earth (por ejemplo, antes y después de un evento); fotos de prensa, del GAD o de redes con autor y fecha |
+> | Marcas de agua, grietas, cauces | Noticias con fecha, registros del ECU 911 y de la SGR, mapas de amenaza del PDOT, cambios visibles en las imágenes históricas |
+> | Entrevistas | Llamada o mensaje a un habitante o a un técnico del GAD (rol, no nombre), con su consentimiento |
+> | Exposición (personas, viviendas, servicios) | Censo 2022 por parroquia, conteo de techos y servicios en la imagen, tabla de exposición del curso (`datos/exposicion`) |
+>
+> En la fila «Fecha y hora de la visita» escriba la fecha de la evaluación remota. En el capítulo, declare en las limitaciones que la evidencia es remota. Si vive cerca y puede ir con seguridad, sus fotos propias siguen siendo la mejor evidencia.
 
 Imprímala o cópiela en su libreta. Llénela en el sitio y pase las calificaciones a las celdas 5 y 6 de `IA2_02`. Cada calificación lleva una evidencia (foto, medida, relato con fuente, documento).
 
