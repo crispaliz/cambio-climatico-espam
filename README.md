@@ -23,6 +23,8 @@ herramientas/         código compartido que importan todos los cuadernos
   estaciones/           lectura, control de calidad y métricas
   indices/              ENSO (ONI, ICEN), índices de extremos (ETCCDI) y tendencias
   eventos/              registros de emergencias (ECU 911) para contrastar con el clima
+  exposicion/           exposición por cantón (WorldPop, Copernicus DEM, OpenStreetMap)
+  vulnerabilidad.py     vulnerabilidad, riesgo por cantón y efecto de las medidas (Riesgos de Desastres)
   modelos/              salidas de modelos climáticos
   escenarios/           proyecciones y escenarios
 datos/                archivos pequeños y fijos (límites)
@@ -85,7 +87,7 @@ Cada persona usa su propia cuenta: el CDS limita las solicitudes por cuenta y un
 | Común | Bitácora de El Niño 2026–2027 | [comun/bitacora](practicas/comun/bitacora/): plantilla de registro semanal |
 | Ambiental | 1. Diagnóstico del clima observado | [ambiental/practica-1](practicas/ambiental/practica-1/): IA1_01 climatología → IA1_02 estación–reanálisis → IA1_03 tendencias y ENSO · [plantilla del capítulo 1](practicas/ambiental/practica-1/capitulo-1_plantilla.md) |
 | Riesgos de Desastres | 1. Clima, ENSO y extremos del territorio | [riesgos-desastres/practica-1](practicas/riesgos-desastres/practica-1/): RD1_01 ciclo anual y ENSO → RD1_02 extremos y registro de eventos · [plantilla del capítulo 1](practicas/riesgos-desastres/practica-1/capitulo-1_plantilla.md) |
-| Riesgos de Desastres | 2. Riesgo climático y medidas | [riesgos-desastres/practica-2](practicas/riesgos-desastres/practica-2/): RD2_01 exposición por cantón → RD2_02 vulnerabilidad → RD2_03 matriz de medidas |
+| Riesgos de Desastres | 2. Riesgo climático y medidas | [riesgos-desastres/practica-2](practicas/riesgos-desastres/practica-2/): RD2_01 exposición por cantón → RD2_02 vulnerabilidad y riesgo → RD2_03 medidas, marco normativo y riesgo residual · guía de cada cuaderno · [plantilla del capítulo 2](practicas/riesgos-desastres/practica-2/capitulo-2_plantilla.md) · [guía formativa](practicas/riesgos-desastres/practica-2/guia_formativa.md) · [guía sumativa](practicas/riesgos-desastres/practica-2/guia_sumativa.md) |
 
 ## Preparación de datos (docente)
 

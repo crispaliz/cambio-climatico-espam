@@ -20,6 +20,7 @@ flowchart LR
   end
   CR02 --> IA["Ingeniería Ambiental<br/>IA1_01 climatología · IA1_02 estación–reanálisis · IA1_03 tendencias y ENSO"]
   CR02 --> RD["Riesgos de Desastres<br/>RD1_01 ciclo anual y ENSO · RD1_02 extremos y eventos"]
+  RD --> RD2["Riesgos de Desastres · P2<br/>RD2_01 exposición · RD2_02 vulnerabilidad · RD2_03 medidas"]
 ```
 
 ## Reglas de la estructura
@@ -45,4 +46,6 @@ Un estudiante descarga y prepara sus datos **una sola vez**, con los cuadernos c
 | Ambiental · P1 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/ambiental/practica-1/IA1_03_tendencias_enso.ipynb) `IA1_03_tendencias_enso` | Tendencias, prueba sin El Niño y compuestos por fase de ENSO |
 | Riesgos · P1 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/riesgos-desastres/practica-1/RD1_01_ciclo_anual_enso.ipynb) `RD1_01_ciclo_anual_enso` | Ciclo anual y compuestos por fase de ENSO |
 | Riesgos · P1 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/riesgos-desastres/practica-1/RD1_02_extremos_eventos.ipynb) `RD1_02_extremos_eventos` | Evidencia en las variables medias, índices de extremos y registro de eventos (con el ECU 911) |
-| Riesgos · P2 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/riesgos-desastres/practica-2/RD2_01_exposicion.ipynb) `RD2_01_exposicion` | Exposición por cantón a las amenazas del capítulo 1 |
+| Riesgos · P2 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/riesgos-desastres/practica-2/RD2_01_exposicion.ipynb) `RD2_01_exposicion` | Exposición por cantón a las amenazas del capítulo 1 ([guía](riesgos-desastres/practica-2/guia_RD2_01.md)) |
+| Riesgos · P2 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/riesgos-desastres/practica-2/RD2_02_vulnerabilidad.ipynb) `RD2_02_vulnerabilidad` | Vulnerabilidad e índice de riesgo de los cantones prioritarios ([guía](riesgos-desastres/practica-2/guia_RD2_02.md)) |
+| Riesgos · P2 | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crispaliz/cambio-climatico-espam/blob/main/practicas/riesgos-desastres/practica-2/RD2_03_matriz_medidas.ipynb) `RD2_03_matriz_medidas` | Medidas de adaptación y mitigación, marco normativo, cartera y riesgo residual ([guía](riesgos-desastres/practica-2/guia_RD2_03.md)) |

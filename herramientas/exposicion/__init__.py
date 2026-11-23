@@ -58,6 +58,15 @@ NOMBRES = {
 }
 
 
+# Cantones cuya provincia cambió después de la cartografía del curso (límites INEC anteriores a 2013).
+# La Concordia (0808) se anexó a Santo Domingo de los Tsáchilas en 2013: aquí se cuenta en esa provincia.
+REASIGNADOS = {"0808": ("23", "Santo Domingo de los Tsáchilas")}
+
+# Con menos cantones que este número, los quintiles dentro de la provincia no discriminan: se califica
+# frente a todos los cantones del país (ver calificar).
+MIN_CANTONES = 5
+
+
 def metadatos() -> dict:
     return json.loads(META.read_text(encoding="utf-8")) if META.exists() else {}
 
@@ -66,10 +75,13 @@ def eventos_por_canton(codigo_provincia: str, desde_desinventar=True, desde_ecu9
     """Eventos por cantón y amenaza. DesInventar: fichas de desastre (con afectados y viviendas);
     ECU 911: días con incidentes del mismo tipo en el cantón (no son desastres verificados)."""
     cp = str(codigo_provincia).zfill(2)
+    incluir = {c for c, (p, _) in REASIGNADOS.items() if p == cp}
+    excluir = {c for c, (p, _) in REASIGNADOS.items() if c[:2] == cp and p != cp}
     filas = []
     if desde_desinventar and DESINVENTAR.exists():
         d = pd.read_csv(DESINVENTAR, dtype={"cod_provincia": str, "cod_canton": str})
-        d = d[(d.cod_provincia == cp) & (d.cod_canton.fillna("").str.len() == 4)]
+        d = d[((d.cod_provincia == cp) | d.cod_canton.isin(incluir)) & ~d.cod_canton.isin(excluir)
+              & (d.cod_canton.fillna("").str.len() == 4)]
         for a, tipos in EVENTOS.items():
             s = d[d.tipo.isin(tipos)]
             g = s.groupby("cod_canton").agg(n=("tipo", "size"), afectados=("afectados", "sum"), viviendas=("viviendas_afectadas", "sum"))
@@ -81,7 +93,7 @@ def eventos_por_canton(codigo_provincia: str, desde_desinventar=True, desde_ecu9
         e["codigo"] = e["cod_parroquia"].str.zfill(6).str[:4]
         from herramientas.eventos.ecu911 import RECODIFICAR
         e["codigo"] = e["codigo"].replace(RECODIFICAR)   # La Concordia: 2302 en el ECU 911, 0808 en los límites
-        e = e[e["codigo"].str[:2] == cp]
+        e = e[((e["codigo"].str[:2] == cp) | e["codigo"].isin(incluir)) & ~e["codigo"].isin(excluir)]
         for a, tipos in EVENTOS.items():
             s = e[e.tipo.isin(tipos)].drop_duplicates(["fecha", "codigo", "tipo"])
             for c, n in s.groupby("codigo").size().items():
@@ -97,6 +109,8 @@ def de_provincia(provincia: str, eventos: pd.DataFrame | None = None) -> pd.Data
         raise FileNotFoundError("Aún no está la tabla de exposición (datos/exposicion/exposicion_cantones.csv). "
                                 "Avise al docente: se genera con el flujo «Exposición por cantón» de GitHub Actions.")
     t = pd.read_csv(TABLA, dtype={"codigo": str, "codigo_provincia": str})
+    for c, (cp, nom) in REASIGNADOS.items():
+        t.loc[t["codigo"] == c, ["codigo_provincia", "provincia"]] = [cp, nom]
     t = t[t["provincia"].map(limites.normalizar) == limites.normalizar(provincia)].copy()
     if t.empty:
         raise ValueError(f"No hay cantones para la provincia «{provincia}»")
@@ -112,6 +126,15 @@ def de_provincia(provincia: str, eventos: pd.DataFrame | None = None) -> pd.Data
     return t.sort_values("poblacion_2022" if "poblacion_2022" in t else "canton", ascending=False).reset_index(drop=True)
 
 
+def de_pais() -> pd.DataFrame:
+    """Tabla de exposición de todos los cantones del país (referencia para provincias con pocos cantones)."""
+    t = pd.read_csv(TABLA, dtype={"codigo": str, "codigo_provincia": str})
+    for c, (cp, nom) in REASIGNADOS.items():
+        t.loc[t["codigo"] == c, ["codigo_provincia", "provincia"]] = [cp, nom]
+    provs = [p for p in t["provincia"].dropna().unique() if not str(p).lower().startswith("zona no")]
+    return pd.concat([de_provincia(p) for p in provs], ignore_index=True)
+
+
 def quintil(s: pd.Series) -> pd.Series:
     """Puntaje 1–5 por posición dentro de la provincia (0 si el valor es 0: no hay nada expuesto)."""
     s = pd.to_numeric(s, errors="coerce").fillna(0)
@@ -124,20 +147,26 @@ def quintil(s: pd.Series) -> pd.Series:
     return out
 
 
-def calificar(t: pd.DataFrame, amenazas) -> tuple[pd.DataFrame, dict]:
+def calificar(t: pd.DataFrame, amenazas, referencia: pd.DataFrame | None = None) -> tuple[pd.DataFrame, dict]:
     """Exposición 1–5 por cantón y amenaza: media de los quintiles de los indicadores que varían en la provincia.
 
+    Con `referencia` (por ejemplo, de_pais()), los quintiles se calculan frente a todos esos cantones y no solo
+    frente a los de la provincia: se usa cuando la provincia tiene menos de MIN_CANTONES cantones.
     Un cantón con todos sus indicadores en 0 recibe 1 (nada o casi nada expuesto).
     Devuelve (tabla de puntajes, indicadores usados por amenaza).
     """
     punt, usados = pd.DataFrame({"codigo": t["codigo"], "canton": t["canton"]}), {}
+    base = t
+    if referencia is not None:
+        base = pd.concat([referencia[~referencia["codigo"].isin(t["codigo"])], t], ignore_index=True)
+    n = len(t)
     for a in amenazas:
-        cols = [c for c in INDICADORES[a] if c in t and pd.to_numeric(t[c], errors="coerce").fillna(0).gt(0).any()]
+        cols = [c for c in INDICADORES[a] if c in t and pd.to_numeric(base[c], errors="coerce").fillna(0).gt(0).any()]
         usados[a] = cols
         if not cols:
             punt[a] = np.nan
             continue
-        q = pd.concat([quintil(t[c]) for c in cols], axis=1)
+        q = pd.concat([quintil(base[c]).iloc[-n:].set_axis(t.index) for c in cols], axis=1)
         punt[a] = q.mean(axis=1).round().clip(lower=1).astype(int)
     return punt, usados
 
