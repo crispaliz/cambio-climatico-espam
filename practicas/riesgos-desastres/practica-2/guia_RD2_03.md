@@ -133,7 +133,8 @@ Los resultados de esta sección vienen del ejemplo ilustrativo de Chone.
 |---|---|
 | «Línea n: faltan columnas» | Faltan puntajes o puso un punto y coma de más o de menos. Deben ser 9 campos: id, 7 puntajes y la justificación |
 | «Los puntajes deben ser enteros de 1 a 5» | Escribió 3,5 o 0. Use enteros de 1 a 5 |
-| «Ids que no están en el catálogo» | Escribió mal el id (por ejemplo, `A1` en vez de `A01`) o dejó el `#` delante del id |
+| «Ids que no están en el catálogo» | Escribió mal el id (por ejemplo, `A01` con la letra O en vez del cero). `a1` o `A1` se aceptan y se leen como `A01` |
+| «Ids repetidos en la evaluación» | Copió dos veces la misma medida: deje una sola línea por id |
 | «No evaluó ninguna medida de mitigación pura» | Quite el `#` de una línea M del bloque y califíquela |
 | «EVALUACIÓN POR DEFECTO» en el título de la figura | La celda `EVALUACION` está vacía o solo tiene comentarios. No es válida para entregar |
 | La cartera no tiene la medida que el equipo quería | La cartera la arma el puntaje. Si el equipo cree que debería estar, revise sus calificaciones o discútalo en el capítulo |

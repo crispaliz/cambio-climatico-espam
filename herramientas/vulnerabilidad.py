@@ -273,7 +273,7 @@ def efecto_cartera(cal_canton: pd.DataFrame, expo_canton: dict, amenazas: dict, 
                     e[k] = max(1, e[k] - efecto); cambios.append(f"{i}: exposición a {k} −{efecto}")
     S0 = cal_canton[cal_canton.componente == "sensibilidad"]["valor"].mean()
     CA0 = cal_canton[cal_canton.componente == "capacidad"]["valor"].mean()
-    V0, V1 = (S0 + 6 - CA0) / 2, (s.mean() + 6 - ca.mean()) / 2
+    V0, V1 = round((S0 + 6 - CA0) / 2, 2), round((s.mean() + 6 - ca.mean()) / 2, 2)  # igual que vulnerabilidad()
     filas = []
     for k, a in amenazas.items():
         if not a or k not in expo_canton or pd.isna(expo_canton[k]):

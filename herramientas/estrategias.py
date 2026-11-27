@@ -11,6 +11,8 @@ MAATE (2025), Segunda NDC del Ecuador; MAATE, Plan Nacional de Adaptación al Ca
 """
 from __future__ import annotations
 
+import re
+
 import pandas as pd
 
 # tipo: M (mitigación), A (adaptación), MA (las dos)
@@ -99,8 +101,18 @@ def leer_evaluacion(texto: str) -> pd.DataFrame:
             raise ValueError(f"Línea {n}: los puntajes deben ser enteros de 1 a 5") from None
         if any(not 1 <= x <= 5 for x in puntos):
             raise ValueError(f"Línea {n}: los puntajes van de 1 a 5")
-        filas.append([p[0], *puntos, ";".join(p[1 + len(CRITERIOS):]).strip()])
-    return pd.DataFrame(filas, columns=["id", *CRITERIOS, "justificacion"]).set_index("id")
+        filas.append([_normalizar_id(p[0]), *puntos, ";".join(p[1 + len(CRITERIOS):]).strip()])
+    ev = pd.DataFrame(filas, columns=["id", *CRITERIOS, "justificacion"]).set_index("id")
+    rep = sorted(set(ev.index[ev.index.duplicated()]))
+    if rep:
+        raise ValueError(f"Ids repetidos en la evaluación: {rep}. Deje una sola línea por medida")
+    return ev
+
+
+def _normalizar_id(x: str) -> str:
+    """«a1», «A1» o «a01» → «A01»; deja igual lo que no tenga la forma letra + número."""
+    m = re.fullmatch(r"([AaMm])\s*0*(\d{1,2})", x.strip())
+    return f"{m.group(1).upper()}{int(m.group(2)):02d}" if m else x.strip()
 
 
 def puntuar(ev: pd.DataFrame, pesos=PESOS) -> pd.Series:
